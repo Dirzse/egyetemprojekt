@@ -7,7 +7,23 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eb146ef4-dd88-4435-a5b6-f6da352148af" name="Changes" comment="" />
+    <list default="true" id="eb146ef4-dd88-4435-a5b6-f6da352148af" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.egyetemprojekt/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.egyetemprojekt/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Adaptive Performance/AdaptivePerformanceGeneralSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Adaptive Performance/AdaptivePerformanceGeneralSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/InputSystem_Actions.inputactions" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/InputSystem_Actions.inputactions" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/New Material 1.mat.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/New Material 1.mat.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/New Material 2.mat.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/New Material 2.mat.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/New Material.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/New Material.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/New Material.mat.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/New Material.mat.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Settings/UniversalRenderPipelineGlobalSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Settings/UniversalRenderPipelineGlobalSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectAuditorSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectAuditorSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/QualitySettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/QualitySettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/URPProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/URPProjectSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/VisualScriptingSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/VisualScriptingSettings.asset" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,10 +37,69 @@
     <urls />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 1
-}]]></component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.4078840675127618E-90" />
+      <entry key="MS500" value="1.070812368370672E-18" />
+      <entry key="S2" value="3.2168317361167525E-5" />
+      <entry key="S5" value="0.015957738275393585" />
+      <entry key="S10" value="0.1263239418138683" />
+      <entry key="S30" value="0.5017590599108914" />
+      <entry key="S60" value="0.7083495323008913" />
+      <entry key="M2" value="0.8416350350959086" />
+      <entry key="M5" value="0.9333607252042245" />
+      <entry key="M10" value="0.9661059596153128" />
+      <entry key="M15" value="0.9772743662222241" />
+      <entry key="M30" value="0.9885718821725732" />
+      <entry key="H1" value="0.99426952189664" />
+      <entry key="H2" value="0.9971306443473893" />
+      <entry key="H4" value="0.9985642915443098" />
+      <entry key="D1" value="0.9997605719886966" />
+      <entry key="W1" value="0.9999657924881235" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000281009436824" />
+      <entry key="S2" value="1.084669032540622" />
+      <entry key="S5" value="1.5547700729954892" />
+      <entry key="S10" value="2.2927952913185727" />
+      <entry key="S30" value="3.9234696102882993" />
+      <entry key="S60" value="4.777413094068476" />
+      <entry key="M2" value="5.332681004494866" />
+      <entry key="M5" value="5.718088511780282" />
+      <entry key="M10" value="5.856405790355634" />
+      <entry key="M15" value="5.903673242058145" />
+      <entry key="M30" value="5.951535188336596" />
+      <entry key="H1" value="5.9756917080088785" />
+      <entry key="H2" value="5.987826816041871" />
+      <entry key="H4" value="5.993908640200778" />
+      <entry key="D1" value="5.998984110461328" />
+      <entry key="W1" value="5.999854856679383" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="2.170026077066823E-4" />
+      <entry key="MS500" value="0.18505169754386624" />
+      <entry key="S2" value="0.6790297877984577" />
+      <entry key="S5" value="1.2262866583974261" />
+      <entry key="S10" value="2.1298523163170398" />
+      <entry key="S30" value="4.257241766073323" />
+      <entry key="S60" value="5.384239165688312" />
+      <entry key="M2" value="6.117937798718488" />
+      <entry key="M5" value="6.627348341935323" />
+      <entry key="M10" value="6.810183994639243" />
+      <entry key="M15" value="6.87266598176117" />
+      <entry key="M30" value="6.93593431204521" />
+      <entry key="H1" value="6.967866791566033" />
+      <entry key="H2" value="6.983908217265935" />
+      <entry key="H4" value="6.991947803043163" />
+      <entry key="D1" value="6.998657090465569" />
+      <entry key="W1" value="6.999808134298224" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 1
+}</component>
   <component name="ProjectId" id="3KdWWqlB0rPnNLxvliqC3OYnovS" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -33,6 +108,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -40,16 +116,19 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "cidr.known.project.marker": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main-menu",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "dirzse",
+    "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true"
   }
 }]]></component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.8f1\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.6.5f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-projectPath C:\Users\User\Desktop\SzoftverGame\egyetemprojekt -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="C:\Users\User\Desktop\SzoftverGame\egyetemprojekt" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -59,7 +138,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.8f1\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.6.5f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath C:\Users\User\Desktop\SzoftverGame\egyetemprojekt -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="C:\Users\User\Desktop\SzoftverGame\egyetemprojekt" />
       <option name="PASS_PARENT_ENVS" value="1" />
