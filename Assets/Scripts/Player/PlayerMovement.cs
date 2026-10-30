@@ -9,9 +9,10 @@ public class PlayerMovement : MonoBehaviour
     [Header("Bemenetek (Input Actions)")]
     public InputActionReference moveAction;
     public InputActionReference jumpAction;
+    public InputActionReference runAction;
 
     [Header("Mozgás paraméterek")]
-    public float speed = 12f; 
+    public float speed = 6f; 
     private float gravity = -9.81f; 
     public float jumpHeight = 1.5f; 
 
@@ -27,12 +28,14 @@ public class PlayerMovement : MonoBehaviour
     {
         if (moveAction != null) moveAction.action.Enable();
         if (jumpAction != null) jumpAction.action.Enable();
+        if (runAction != null) runAction.action.Enable();
     }
 
     private void OnDisable()
     {
         if (moveAction != null) moveAction.action.Disable();
         if (jumpAction != null) jumpAction.action.Disable();
+        if (runAction != null) runAction.action.Disable();
     }
 
     void Update()
@@ -53,11 +56,21 @@ public class PlayerMovement : MonoBehaviour
         Vector3 move = transform.right * x + transform.forward * z;
         controller.Move(move * speed * Time.deltaTime);
 
-        if (jumpAction.action.triggered && isGrounded)
+        if (jumpAction.action.triggered && isGrounded) 
         {
+            
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
+        if (runAction.action.IsPressed())
+        {
+            speed = 12f; 
+        }
+        else
+        {
+            speed = 5f; 
+        }
+        
         // 4. Gravitáció alkalmazása
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);

@@ -117,7 +117,7 @@
     "cidr.known.project.marker": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "dirzse",
+    "git-widget-placeholder": "main",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -128,7 +128,7 @@
 }]]></component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.6.5f1\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="B:\Unity\Editors\6000.6.5f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-projectPath C:\Users\User\Desktop\SzoftverGame\egyetemprojekt -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="C:\Users\User\Desktop\SzoftverGame\egyetemprojekt" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -138,7 +138,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.6.5f1\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="B:\Unity\Editors\6000.6.5f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath C:\Users\User\Desktop\SzoftverGame\egyetemprojekt -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="C:\Users\User\Desktop\SzoftverGame\egyetemprojekt" />
       <option name="PASS_PARENT_ENVS" value="1" />
