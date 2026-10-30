@@ -6,10 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MainMenu.unity
+    path: Assets/Scenes/UI/MainMenu.unity
     guid: aab542ca340995f4f971c4937b9a6a79
   - enabled: 1
-    path: Assets/Maps/Alcatraz1/Alcatraz1.unity
+    path: Assets/Scenes/Maps/Alcatraz1/Alcatraz1.unity
     guid: cdb49bbc019a0d14ea4a5e7a8e791c95
   m_configObjects:
     com.unity.adaptivePerformance.basic.provider_settings: {fileID: 11400000, guid: 4c0566c34de299847b66bd4f75b817bc, type: 2}
