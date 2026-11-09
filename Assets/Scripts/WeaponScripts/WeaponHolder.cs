@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class WeaponHolder : MonoBehaviour
 {
-    [SerializeField] Weapon[] weapons;   // 0 = íj, 1 = kard
+    [SerializeField] Weapon[] weapons;   // 1. íj, 2. kard, 3. dobókés, 4. gránát ...
     int current = -1;
+
+    public Weapon Current => current >= 0 ? weapons[current] : null;
 
     void Start()
     {
@@ -13,10 +15,14 @@ public class WeaponHolder : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) Equip(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) Equip(1);
+        // 1-9 gombok: fegyverváltás
+        for (int i = 0; i < weapons.Length && i < 9; i++)
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i)) Equip(i);
 
-        if (current >= 0) weapons[current].HandleInput();
+        if (Current == null) return;
+
+        Current.SetAiming(Input.GetMouseButton(1));   // jobb klikk = célzás
+        Current.HandleInput();
     }
 
     void Equip(int index)
