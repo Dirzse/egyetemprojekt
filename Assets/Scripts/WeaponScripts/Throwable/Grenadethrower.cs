@@ -1,20 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Gránát fegyver: jobb klikk = célzás + ív kirajzolása, bal klikk = dobás.
 [RequireComponent(typeof(LineRenderer))]
 public class GrenadeThrower : Weapon
 {
     [SerializeField] Transform throwPoint;
     [SerializeField] Grenade grenadePrefab;
     [SerializeField] float throwSpeed = 15f;
-    [SerializeField] float upwardAngle = 8f;       // enyhe felfelé dobás, hogy szép ívet adjon
-    [SerializeField] int ammo = 3;
+    [SerializeField] float upwardAngle = 8f;
 
     [Header("Ív")]
     [SerializeField] int maxPoints = 60;
     [SerializeField] float timeStep = 0.05f;
-    [SerializeField] LayerMask hitMask = ~0;       // mibe ütközzön az ív (a Player layert vedd ki!)
+    [SerializeField] LayerMask hitMask = ~0;
 
     LineRenderer line;
     readonly List<Vector3> points = new List<Vector3>();
@@ -28,31 +26,33 @@ public class GrenadeThrower : Weapon
 
     protected override void OnAimChanged(bool aiming) => line.enabled = aiming;
 
-    // Ugyanazt a sebességet használja az ív és a tényleges dobás
     Vector3 ThrowVelocity()
     {
         Vector3 dir = Quaternion.AngleAxis(-upwardAngle, throwPoint.right) * throwPoint.forward;
         return dir * throwSpeed;
     }
 
+    public override bool TryGetAmmoType(out AmmoType type) { type = AmmoType.Grenade; return true; }
+
     public override void HandleInput()
     {
-        if (Input.GetMouseButtonDown(0) && CanUse && ammo > 0)
+        if (Input.GetMouseButtonDown(0) && CanUse && HasAmmo(AmmoType.Grenade))
         {
-            ammo--;
+            if (ConsumeAmmo(AmmoType.Grenade) <= 0) return;
             nextUseTime = Time.time + cooldown;
 
-            Vector3 v = ThrowVelocity();
             Grenade g = Instantiate(grenadePrefab, throwPoint.position, Quaternion.identity);
-            g.Launch(v);
+            g.Launch(ThrowVelocity());
         }
     }
 
     void LateUpdate()
     {
         if (!IsAiming) return;
-        line.enabled = ammo > 0;
-        if (ammo > 0) DrawTrajectory();
+
+        bool hasGrenade = HasAmmo(AmmoType.Grenade);
+        line.enabled = hasGrenade;
+        if (hasGrenade) DrawTrajectory();
     }
 
     void DrawTrajectory()
@@ -70,7 +70,7 @@ public class GrenadeThrower : Weapon
 
             if (Physics.Linecast(pos, next, out RaycastHit hit, hitMask, QueryTriggerInteraction.Ignore))
             {
-                points.Add(hit.point);   // itt ér földet / falat
+                points.Add(hit.point);
                 break;
             }
             points.Add(next);
