@@ -813,8 +813,11 @@ MonoBehaviour:
   controller: {fileID: 392089018}
   moveAction: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   jumpAction: {fileID: -2099379676528639254, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  speed: 12
-  jumpHeight: 1.5
+  runAction: {fileID: -7471211009204490832, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  walkSpeed: 5
+  runSpeed: 12
+  jumpHeight: 1
+  gravity: -9.81
   groundCheck: {fileID: 228894421}
   groundDistance: 0.2
   groundMask:

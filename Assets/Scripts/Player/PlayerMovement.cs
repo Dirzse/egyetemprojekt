@@ -12,17 +12,30 @@ public class PlayerMovement : MonoBehaviour
     public InputActionReference runAction;
 
     [Header("Mozgás paraméterek")]
-    public float speed = 6f; 
-    private float gravity = -9.81f; 
-    public float jumpHeight = 1.5f; 
+    public float walkSpeed = 5f;
+    public float runSpeed = 12f;
+    public float jumpHeight = 1.5f;
+    public float gravity = -9.81f;
 
     [Header("Talaj ellenőrzés (Ground Check)")]
-    public Transform groundCheck; 
-    public float groundDistance = 0.4f; 
-    public LayerMask groundMask; 
+    public Transform groundCheck;
+    public float groundDistance = 0.4f;
+    public LayerMask groundMask;
 
     private Vector3 velocity;
     private bool isGrounded;
+
+    private void Awake()
+    {
+        if (controller == null)
+            controller = GetComponent<CharacterController>();
+
+        if (groundMask.value == 0)
+            Debug.LogWarning("PlayerMovement: a groundMask 'Nothing'-ra van állítva, ezért a CheckSphere sosem talál talajt!", this);
+
+        if (groundCheck == null)
+            Debug.LogWarning("PlayerMovement: nincs groundCheck megadva, csak a CharacterController.isGrounded lesz használva.", this);
+    }
 
     private void OnEnable()
     {
@@ -40,39 +53,34 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // 1. Talaj ellenőrzés
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        // 1. Talaj ellenőrzés (a CharacterController saját ellenőrzése tartalékként)
+        bool sphereGrounded = groundCheck != null &&
+                              Physics.CheckSphere(groundCheck.position, groundDistance, groundMask, QueryTriggerInteraction.Ignore);
+        isGrounded = sphereGrounded || controller.isGrounded;
 
-        if (isGrounded && velocity.y < 0)
+        if (isGrounded && velocity.y < 0f)
         {
             velocity.y = -2f;
         }
 
         // 2. Vízszintes mozgás
         Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
-        float x = moveInput.x;
-        float z = moveInput.y;
+        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
 
-        Vector3 move = transform.right * x + transform.forward * z;
-        controller.Move(move * speed * Time.deltaTime);
+        // 3. Futás
+        float currentSpeed = runAction.action.IsPressed() ? runSpeed : walkSpeed;
 
-        if (jumpAction.action.triggered && isGrounded) 
+        // 4. Ugrás
+        if (jumpAction.action.WasPressedThisFrame() && isGrounded)
         {
-            
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
-        if (runAction.action.IsPressed())
-        {
-            speed = 12f; 
-        }
-        else
-        {
-            speed = 5f; 
-        }
-        
-        // 4. Gravitáció alkalmazása
+        // 5. Gravitáció
         velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
+
+        // 6. Egyetlen Move hívás (vízszintes + függőleges mozgás együtt)
+        Vector3 finalMove = move * currentSpeed + new Vector3(0f, velocity.y, 0f);
+        controller.Move(finalMove * Time.deltaTime);
     }
 }
