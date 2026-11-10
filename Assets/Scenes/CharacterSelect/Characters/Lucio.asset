@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df0a234cb7ac03d66121b6f776373aae, type: 3}
+  m_Name: Lucio
+  m_EditorClassIdentifier: 
+  characterName: Lucio
+  description: "I love to run. Walls, roofs, gaps: if there\u2019s a way through, I\u2019ll find it. Fast hands, plenty of knives. Just don\u2019t ask me to tank."
+  portrait: {fileID: 0}
+  previewModel: {fileID: 919132149155446097, guid: a9024495285b2b942adf69f4db7e05d0, type: 3}
+  gameModel: {fileID: 0}
+  modelScale: 1
+  walkSpeed: 5.5
+  runSpeed: 14
+  jumpHeight: 1.8
+  damageMultiplier: 0.9
+  maxHealth: 90
+  throwPowerMultiplier: 0.9
+  reloadSpeedMultiplier: 1.2
+  drawSpeedMultiplier: 1.3
+  startingKnives: 5
+  maxKnives: 6

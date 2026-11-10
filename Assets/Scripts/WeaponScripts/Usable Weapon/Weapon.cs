@@ -12,7 +12,15 @@ public abstract class Weapon : MonoBehaviour
     [SerializeField] float aimFov = 45f;
     [SerializeField] bool showCrosshair = false;
 
+    [Header("Draw / holster")]
+    [Tooltip("Time to draw this weapon before it can be used (seconds). The character's draw speed divides it.")]
+    [SerializeField] protected float drawTime = 0.4f;
+    [Tooltip("Optional: a copy of the weapon model attached to a bone (e.g. the bow on spine_03, the sword on pelvis). " +
+             "Shown while this weapon is NOT in the hand, so the character visibly carries it.")]
+    [SerializeField] GameObject holsteredVisual;
+
     protected float nextUseTime;
+    float drawReadyTime;
     AmmoInventory inventory;
 
     public string DisplayName => string.IsNullOrEmpty(displayName) ? name : displayName;
@@ -44,12 +52,18 @@ public abstract class Weapon : MonoBehaviour
     // Visszaadja, hány darabot sikerült levonni
     protected int ConsumeAmmo(AmmoType type, int n = 1) => Inventory == null ? n : Inventory.Consume(type, n);
 
-    public virtual void OnEquip() { gameObject.SetActive(true); }
+    public virtual void OnEquip()
+    {
+        gameObject.SetActive(true);
+        if (holsteredVisual) holsteredVisual.SetActive(false);
+        drawReadyTime = Time.time + drawTime / Mathf.Max(0.1f, DrawSpeedMultiplier);
+    }
 
     public virtual void OnUnequip()
     {
         SetAiming(false);
         gameObject.SetActive(false);
+        if (holsteredVisual) holsteredVisual.SetActive(true);
     }
 
     public void SetAiming(bool value)
@@ -64,5 +78,17 @@ public abstract class Weapon : MonoBehaviour
 
     public abstract void HandleInput();
 
-    protected bool CanUse => Time.time >= nextUseTime;
+    protected bool CanUse => Time.time >= nextUseTime && IsDrawn;
+    protected bool IsDrawn => Time.time >= drawReadyTime;
+
+    // Stats of the character holding this weapon (null if there is no PlayerStats above it)
+    protected PlayerStats OwnerStats => GetComponentInParent<PlayerStats>();
+    protected float DamageMultiplier => OwnerStats != null ? OwnerStats.DamageMultiplier : 1f;
+    protected float DrawSpeedMultiplier => OwnerStats != null ? OwnerStats.DrawSpeedMultiplier : 1f;
+    protected float ThrowPowerMultiplier => OwnerStats != null ? OwnerStats.ThrowPowerMultiplier : 1f;
+
+    // World pickup: only weapons that override these can be picked up and dropped (e.g. Gun)
+    public virtual bool CanBePickedUp => false;
+    public virtual void OnPickedUp(Transform socket) { }
+    public virtual void OnDropped(Vector3 position, Vector3 velocity) { }
 }

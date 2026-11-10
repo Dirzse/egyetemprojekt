@@ -16,8 +16,9 @@ public class Arrow : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
-    public void Launch(Vector3 velocity)
+    public void Launch(Vector3 velocity, float damageMultiplier = 1f)
     {
+        damage *= damageMultiplier;
         rb.linearVelocity = velocity;   // Unity 6 előtt: rb.velocity
         Destroy(gameObject, lifetime);
     }

@@ -755,8 +755,11 @@ MonoBehaviour:
   controller: {fileID: 392089018}
   moveAction: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   jumpAction: {fileID: -2099379676528639254, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  speed: 12
+  runAction: {fileID: 0}
+  walkSpeed: 5
+  runSpeed: 12
   jumpHeight: 1.5
+  gravity: -9.81
   groundCheck: {fileID: 228894421}
   groundDistance: 0.2
   groundMask:
@@ -1026,9 +1029,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bow
   cooldown: 0.5
+  displayName: 
   canAim: 1
   aimFov: 45
   showCrosshair: 1
+  drawTime: 0.4
+  holsteredVisual: {fileID: 0}
   muzzle: {fileID: 1858881200}
   arrowPrefab: {fileID: 2811630492621834994, guid: 5187dfa4d8f19524e8bbf7c6894b7de7, type: 3}
   playerCamera: {fileID: 1381508122}
@@ -1039,6 +1045,7 @@ MonoBehaviour:
   aimMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  animator: {fileID: 0}
 --- !u!1 &579588601
 GameObject:
   m_ObjectHideFlags: 0
@@ -1825,59 +1832,59 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 392089017}
     m_Modifications:
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalScale.y
       value: 1.03
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalPosition.y
       value: -0.955
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 919132149155446097, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+    - target: {fileID: 919132149155446097, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
       propertyPath: m_Name
-      value: Survival_Character
+      value: Jason
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+  m_SourcePrefab: {fileID: 100100000, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
 --- !u!1 &1041623636
 GameObject:
   m_ObjectHideFlags: 0
@@ -2506,6 +2513,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MouseLook
   mouseSensitivity: 800
   playerBody: {fileID: 392089017}
+  maxLookUp: 80
+  maxLookDown: 55
+  hideOwnBody: 1
 --- !u!114 &1381508120
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2677,7 +2687,11 @@ MonoBehaviour:
   - {fileID: 573162925}
   - {fileID: 2096958010}
   - {fileID: 1444583495}
-  - {fileID: 1963612521}
+  - {fileID: 0}
+  animator: {fileID: 0}
+  pickupSocket: {fileID: 0}
+  playerCamera: {fileID: 0}
+  dropForce: 4
 --- !u!1 &1444583493
 GameObject:
   m_ObjectHideFlags: 0
@@ -2724,14 +2738,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GrenadeThrower
   cooldown: 0.5
+  displayName: 
   canAim: 1
   aimFov: 45
   showCrosshair: 1
+  drawTime: 0.4
+  holsteredVisual: {fileID: 0}
   throwPoint: {fileID: 871613398}
   grenadePrefab: {fileID: -3679039165684026542, guid: 515963a2806b0d8479e6829092b38e24, type: 3}
   throwSpeed: 15
   upwardAngle: 8
-  ammo: 3
   maxPoints: 60
   timeStep: 0.05
   hitMask:
@@ -3430,7 +3446,7 @@ RectTransform:
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!4 &1957180162 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 000fb71d8556157419c1d03fb6b84d7d, type: 3}
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7c768e69b6f96994590ba3433bb8fd07, type: 3}
   m_PrefabInstance: {fileID: 945612528}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1963612519
@@ -3478,14 +3494,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd387b1cfffc5c143a131ffd5270b7be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ThrowingKnife
-  cooldown: 0.5
-  canAim: 1
-  aimFov: 45
-  showCrosshair: 1
-  throwPoint: {fileID: 871613398}
-  knifePrefab: {fileID: 2811630492621834994, guid: 5187dfa4d8f19524e8bbf7c6894b7de7, type: 3}
-  throwSpeed: 30
-  ammo: 5
 --- !u!1 &1963952940
 GameObject:
   m_ObjectHideFlags: 0
@@ -3672,18 +3680,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sword
   cooldown: 0.5
+  displayName: 
   canAim: 0
   aimFov: 45
   showCrosshair: 0
+  drawTime: 0.4
+  holsteredVisual: {fileID: 0}
   playerCamera: {fileID: 1381508122}
   animator: {fileID: 0}
   range: 2.2
   radius: 0.5
   damage: 30
-  hitDelay: 0.15
   hitMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  swingTarget: {fileID: 0}
+  windupEuler: {x: -15, y: 20, z: 35}
+  windupOffset: {x: 0.05, y: 0.05, z: -0.05}
+  slashEuler: {x: 35, y: -45, z: -50}
+  slashOffset: {x: -0.15, y: -0.1, z: 0.15}
+  windupTime: 0.12
+  slashTime: 0.1
+  recoverTime: 0.25
+  hitEffect: {fileID: 0}
+  hitSound: {fileID: 0}
 --- !u!1 &2100164615
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,8 +12,8 @@ public class PlayerMovement : MonoBehaviour
     public InputActionReference runAction;
 
     [Header("Mozgás paraméterek")]
-    public float walkSpeed = 5f;
-    public float runSpeed = 12f;
+    public float walkSpeed = 5f;    // set by PlayerStats from the selected character
+    public float runSpeed = 12f;    // set by PlayerStats from the selected character
     public float jumpHeight = 1.5f;
     public float gravity = -9.81f;
 
@@ -24,6 +24,13 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector3 velocity;
     private bool isGrounded;
+
+    // Read-only movement state for animation (read by PlayerAnimator)
+    public bool IsGrounded => isGrounded;
+    public float VerticalVelocity => velocity.y;
+    public Vector2 MoveInput { get; private set; }
+    public bool IsRunning { get; private set; }
+    public event System.Action Jumped;
 
     private void Awake()
     {
@@ -66,6 +73,8 @@ public class PlayerMovement : MonoBehaviour
         // 2. Vízszintes mozgás
         Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
+        MoveInput = moveInput;
+        IsRunning = runAction.action.IsPressed() && moveInput.sqrMagnitude > 0.01f;
 
         // 3. Futás
         float currentSpeed = runAction.action.IsPressed() ? runSpeed : walkSpeed;
@@ -74,6 +83,7 @@ public class PlayerMovement : MonoBehaviour
         if (jumpAction.action.WasPressedThisFrame() && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            Jumped?.Invoke();
         }
 
         // 5. Gravitáció

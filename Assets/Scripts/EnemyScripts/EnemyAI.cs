@@ -50,6 +50,16 @@ public class EnemyAI : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         startPosition = transform.position;
         currentHealth = maxHealth;
+        SetPlayer();
+    }
+
+    public void SetPlayer(){
+        if (player == null)
+        {
+            PlayerMovement playerMovement = FindFirstObjectByType<PlayerMovement>();
+            if (playerMovement != null) player = playerMovement.transform;
+            else Debug.LogWarning("EnemyAI: no PlayerMovement found in the scene.", this);
+        }
     }
 
     // Ezt hívd meg a sebzést okozó scriptből (lövedék, kard, stb.)
@@ -74,7 +84,7 @@ public class EnemyAI : MonoBehaviour
             Die();
         }
     }
-
+    
     void Die()
     {
         isDead = true;

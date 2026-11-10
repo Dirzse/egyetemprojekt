@@ -99,7 +99,7 @@ public class Sword : Weapon
         if (Physics.SphereCast(cam.position, radius, cam.forward, out RaycastHit hit,
                                range, hitMask, QueryTriggerInteraction.Ignore))
         {
-            hit.collider.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
+            hit.collider.SendMessage("TakeDamage", damage * DamageMultiplier, SendMessageOptions.DontRequireReceiver);
 
             if (hitEffect)
             {

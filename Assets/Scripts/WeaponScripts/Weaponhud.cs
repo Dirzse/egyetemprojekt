@@ -4,7 +4,7 @@ using UnityEngine;
 // Kiírja az aktív fegyver nevét és a hozzá tartozó lőszert.
 public class WeaponHUD : MonoBehaviour
 {
-    [SerializeField] WeaponHolder holder;
+    [SerializeField] WeaponHolder holder;         // if empty, found in the scene
     [SerializeField] AmmoInventory inventory;     // ha üres, a holder szülői közül keresi
     [SerializeField] TMP_Text weaponNameText;
     [SerializeField] TMP_Text ammoText;
@@ -15,6 +15,8 @@ public class WeaponHUD : MonoBehaviour
 
     void Awake()
     {
+        if (!holder) holder = FindFirstObjectByType<WeaponHolder>();
+        if (!holder) Debug.LogWarning("WeaponHUD: no WeaponHolder found.", this);
         if (!inventory && holder) inventory = holder.GetComponentInParent<AmmoInventory>(true);
     }
 
@@ -23,6 +25,8 @@ public class WeaponHUD : MonoBehaviour
 
     void Update()
     {
+        if (!holder) return;
+
         // Fegyverváltás figyelése
         if (holder.Current != shown)
         {
@@ -37,30 +41,35 @@ public class WeaponHUD : MonoBehaviour
     {
         if (shown == null)
         {
-            weaponNameText.text = "";
-            ammoText.text = "";
+            SetText(weaponNameText, "");
+            SetText(ammoText, "");
             return;
         }
 
-        weaponNameText.text = shown.DisplayName;
+        SetText(weaponNameText, shown.DisplayName);
 
         // Lőszer nélküli fegyver (kard): nincs kiírás
         if (!shown.TryGetAmmoType(out AmmoType type))
         {
-            ammoText.text = "";
+            SetText(ammoText, "");
             return;
         }
 
         // Nincs AmmoInventory: végtelen lőszer
         if (inventory == null)
         {
-            ammoText.text = "∞";
-            ammoText.color = normalColor;
+            SetText(ammoText, "∞");
+            if (ammoText) ammoText.color = normalColor;
             return;
         }
 
         int amount = inventory.Get(type);
-        ammoText.text = amount.ToString();
-        ammoText.color = amount > 0 ? normalColor : emptyColor;
+        SetText(ammoText, amount.ToString());
+        if (ammoText) ammoText.color = amount > 0 ? normalColor : emptyColor;
+    }
+
+    static void SetText(TMP_Text text, string value)
+    {
+        if (text) text.text = value;
     }
 }
