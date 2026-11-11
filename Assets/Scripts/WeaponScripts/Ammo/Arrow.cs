@@ -16,9 +16,18 @@ public class Arrow : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
-    public void Launch(Vector3 velocity, float damageMultiplier = 1f)
+    public void Launch(Vector3 velocity, float damageMultiplier = 1f, Transform owner = null)
     {
         damage *= damageMultiplier;
+
+        // Never hits the player who shot it (it spawns next to the player's colliders)
+        Collider own = GetComponent<Collider>();
+        if (owner != null && own != null)
+        {
+            foreach (Collider ownerCollider in owner.GetComponentsInChildren<Collider>(true))
+                Physics.IgnoreCollision(own, ownerCollider);
+        }
+
         rb.linearVelocity = velocity;   // Unity 6 előtt: rb.velocity
         Destroy(gameObject, lifetime);
     }
@@ -36,7 +45,8 @@ public class Arrow : MonoBehaviour
         stuck = true;
 
         // Sebzés, ha van rajta valami (saját interfésszel bővítheted)
-        col.collider.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
+        // Upwards: also reaches the EnemyAI when a child collider of the enemy is hit
+        col.collider.SendMessageUpwards("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
 
         // Beleragad a célba
         rb.isKinematic = true;

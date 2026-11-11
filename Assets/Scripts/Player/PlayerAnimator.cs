@@ -38,7 +38,7 @@ public class PlayerAnimator : MonoBehaviour
     {
         if (animator == null || !animator.isActiveAndEnabled)
         {
-            animator = GetComponentInChildren<Animator>();
+            animator = GetComponentInChildren<Animator>(true);
             if (animator == null)
             {
                 if (!warnedMissing) Debug.LogWarning("PlayerAnimator: no Animator found on the character.");

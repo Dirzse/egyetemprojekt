@@ -380,7 +380,7 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 0
-  maxHealth: 100
+  maxHealth: 80
   currentHealth: 0
   viewDistance: 15
   viewAngle: 110
@@ -393,3 +393,8 @@ MonoBehaviour:
   lookTurnSpeed: 90
   lookPauseMin: 0.5
   lookPauseMax: 2.5
+  roam: 1
+  roamRadius: 10
+  roamSpeed: 2
+  roamWaitMin: 1
+  roamWaitMax: 4

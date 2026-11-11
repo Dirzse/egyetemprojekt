@@ -31,6 +31,13 @@ public class EnemyAI : MonoBehaviour
     public float lookPauseMin = 0.5f;      // Min. ennyit néz egy irányba (mp)
     public float lookPauseMax = 2.5f;      // Max. ennyit néz egy irányba (mp)
 
+    [Header("Roaming (when it does not know about the player)")]
+    public bool roam = true;
+    public float roamRadius = 10f;         // around the start point (or the spawner's sphere)
+    public float roamSpeed = 2f;
+    public float roamWaitMin = 1f;         // pause between two roam points (seconds)
+    public float roamWaitMax = 4f;
+
     private NavMeshAgent agent;
     private Vector3 startPosition;
     private Vector3 lastKnownPosition;
@@ -41,14 +48,18 @@ public class EnemyAI : MonoBehaviour
     private bool fullRotationDone = false;
     private Quaternion lookTargetRotation;
     private float lookTimer = 0f;
+    private Vector3 roamCenter;
+    private bool roamMoving = false;
+    private float roamWaitTimer = 0f;
 
-    private enum State { Idle, Chase, GoToLastKnown, Searching, Return }
-    private State state = State.Idle;
+    private enum State { Idle, Roam, Chase, GoToLastKnown, Searching, Return }
+    private State state = State.Roam;
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         startPosition = transform.position;
+        roamCenter = startPosition;
         currentHealth = maxHealth;
         SetPlayer();
     }
@@ -60,6 +71,13 @@ public class EnemyAI : MonoBehaviour
             if (playerMovement != null) player = playerMovement.transform;
             else Debug.LogWarning("EnemyAI: no PlayerMovement found in the scene.", this);
         }
+    }
+
+    // Called by EnemySpawner: the enemy roams inside the spawner's sphere
+    public void SetRoamArea(Vector3 center, float radius)
+    {
+        roamCenter = center;
+        roamRadius = radius;
     }
 
     // Ezt hívd meg a sebzést okozó scriptből (lövedék, kard, stb.)
@@ -124,6 +142,7 @@ public class EnemyAI : MonoBehaviour
         switch (state)
         {
             case State.Idle:          break;
+            case State.Roam:          DoRoam();          break;
             case State.Chase:         DoChase();         break;
             case State.GoToLastKnown: DoGoToLastKnown(); break;
             case State.Searching:     DoSearching();     break;
@@ -133,6 +152,7 @@ public class EnemyAI : MonoBehaviour
 
     void DoChase()
     {
+        roamMoving = false;
         agent.speed = chaseSpeed;
         agent.SetDestination(player.position);
     }
@@ -195,7 +215,57 @@ public class EnemyAI : MonoBehaviour
         agent.SetDestination(startPosition);
 
         if (ReachedDestination())
-            state = State.Idle;
+        {
+            roamMoving = false;
+            roamWaitTimer = Random.Range(roamWaitMin, roamWaitMax);
+            state = roam ? State.Roam : State.Idle;
+        }
+    }
+
+    // Walks to random points on the NavMesh inside the roam area, with short pauses
+    void DoRoam()
+    {
+        if (!roam || !agent.isOnNavMesh) return;
+        agent.speed = roamSpeed;
+
+        if (roamMoving)
+        {
+            if (ReachedDestination())
+            {
+                roamMoving = false;
+                roamWaitTimer = Random.Range(roamWaitMin, roamWaitMax);
+            }
+            return;
+        }
+
+        roamWaitTimer -= Time.deltaTime;
+        if (roamWaitTimer > 0f) return;
+
+        if (TryGetRoamPoint(out Vector3 point))
+        {
+            agent.SetDestination(point);
+            roamMoving = true;
+        }
+        else
+        {
+            roamWaitTimer = 0.5f;
+        }
+    }
+
+    bool TryGetRoamPoint(out Vector3 point)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            Vector2 offset = Random.insideUnitCircle * roamRadius;
+            Vector3 candidate = roamCenter + new Vector3(offset.x, 0f, offset.y);
+            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+            {
+                point = hit.position;
+                return true;
+            }
+        }
+        point = transform.position;
+        return false;
     }
 
     bool ReachedDestination()
@@ -246,6 +316,12 @@ public class EnemyAI : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(lastKnownPosition, 0.5f);
+        }
+
+        if (roam)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(Application.isPlaying ? roamCenter : transform.position, roamRadius);
         }
     }
 }

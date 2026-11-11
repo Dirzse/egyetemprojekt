@@ -26,9 +26,12 @@ public class Bow : Weapon
 
     float chargeStart = -1f;
 
+    public override bool TryGetAmmoType(out AmmoType type) { type = AmmoType.Arrow; return true; }
+
     public override void HandleInput()
     {
-        if (Input.GetMouseButtonDown(0) && CanUse)
+        // Csak akkor kezd tölteni, ha van nyíl
+        if (Input.GetMouseButtonDown(0) && CanUse && HasAmmo(AmmoType.Arrow))
         {
             chargeStart = Time.time;
             if (animator) animator.SetBool(BowDrawHash, true);
@@ -42,7 +45,7 @@ public class Bow : Weapon
                 animator.SetBool(BowDrawHash, false);
                 animator.SetTrigger(BowFireHash);
             }
-            Fire(charge);
+            if (ConsumeAmmo(AmmoType.Arrow) > 0) Fire(charge);
             chargeStart = -1f;
             nextUseTime = Time.time + cooldown;
         }
@@ -61,7 +64,7 @@ public class Bow : Weapon
 
         Arrow arrow = Instantiate(arrowPrefab, muzzle.position, Quaternion.LookRotation(dir));
         // ThrowPowerMultiplier = how strong the character's bow string is
-        arrow.Launch(dir * Mathf.Lerp(minSpeed, maxSpeed, charge) * ThrowPowerMultiplier, DamageMultiplier);
+        arrow.Launch(dir * Mathf.Lerp(minSpeed, maxSpeed, charge) * ThrowPowerMultiplier, DamageMultiplier, transform.root);
     }
 
     public override void OnUnequip()

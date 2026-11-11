@@ -96,10 +96,10 @@ public class Sword : Weapon
     void DoHit()
     {
         Transform cam = playerCamera.transform;
-        if (Physics.SphereCast(cam.position, radius, cam.forward, out RaycastHit hit,
-                               range, hitMask, QueryTriggerInteraction.Ignore))
+        // Skips the player's own body and weapons (the sword model has colliders too)
+        if (DamageUtil.SphereCastIgnoring(cam.position, radius, cam.forward, range, hitMask, transform.root, out RaycastHit hit))
         {
-            hit.collider.SendMessage("TakeDamage", damage * DamageMultiplier, SendMessageOptions.DontRequireReceiver);
+            DamageUtil.Apply(hit.collider, damage * DamageMultiplier);
 
             if (hitEffect)
             {

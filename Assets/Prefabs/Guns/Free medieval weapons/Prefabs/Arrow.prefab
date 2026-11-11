@@ -369,7 +369,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Arrow
   lifetime: 10
-  damage: 25
+  damage: 23
 --- !u!1 &3851047056594252900
 GameObject:
   m_ObjectHideFlags: 0
