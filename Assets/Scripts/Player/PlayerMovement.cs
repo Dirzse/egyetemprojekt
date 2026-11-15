@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Komponensek")]
-    public CharacterController controller;
+    [HideInInspector] public CharacterController controller;   // taken from this object in Awake
 
     [Header("Bemenetek (Input Actions)")]
     public InputActionReference moveAction;
@@ -19,8 +19,12 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Talaj ellenőrzés (Ground Check)")]
     public Transform groundCheck;
-    public float groundDistance = 0.4f;
+    public float groundDistance = 0.2f;
     public LayerMask groundMask;
+
+    [Header("Editor helpers")]
+    [Tooltip("Child object that only shows the facing direction in the editor. Deleted when the game starts.")]
+    public string faceMarkerName = "face";
 
     private Vector3 velocity;
     private bool isGrounded;
@@ -34,8 +38,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
-        if (controller == null)
-            controller = GetComponent<CharacterController>();
+        controller = GetComponent<CharacterController>();
+
+        // The capsule mesh is only an editor placeholder, the character model is shown in game
+        MeshRenderer placeholder = GetComponent<MeshRenderer>();
+        if (placeholder != null) Destroy(placeholder);
+
+        Transform face = FindChildRecursive(transform, faceMarkerName);
+        if (face != null) Destroy(face.gameObject);
 
         if (groundMask.value == 0)
             Debug.LogWarning("PlayerMovement: a groundMask 'Nothing'-ra van állítva, ezért a CheckSphere sosem talál talajt!", this);
@@ -44,18 +54,33 @@ public class PlayerMovement : MonoBehaviour
             Debug.LogWarning("PlayerMovement: nincs groundCheck megadva, csak a CharacterController.isGrounded lesz használva.", this);
     }
 
+    static Transform FindChildRecursive(Transform parent, string childName)
+    {
+        if (string.IsNullOrEmpty(childName)) return null;
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName) return child;
+            Transform found = FindChildRecursive(child, childName);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    // An unassigned action (or a reference without an action) is treated as "not pressed" instead of an error
+    static bool HasAction(InputActionReference reference) => reference != null && reference.action != null;
+
     private void OnEnable()
     {
-        if (moveAction != null) moveAction.action.Enable();
-        if (jumpAction != null) jumpAction.action.Enable();
-        if (runAction != null) runAction.action.Enable();
+        if (HasAction(moveAction)) moveAction.action.Enable();
+        if (HasAction(jumpAction)) jumpAction.action.Enable();
+        if (HasAction(runAction)) runAction.action.Enable();
     }
 
     private void OnDisable()
     {
-        if (moveAction != null) moveAction.action.Disable();
-        if (jumpAction != null) jumpAction.action.Disable();
-        if (runAction != null) runAction.action.Disable();
+        if (HasAction(moveAction)) moveAction.action.Disable();
+        if (HasAction(jumpAction)) jumpAction.action.Disable();
+        if (HasAction(runAction)) runAction.action.Disable();
     }
 
     void Update()
@@ -71,16 +96,17 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // 2. Vízszintes mozgás
-        Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
+        Vector2 moveInput = HasAction(moveAction) ? moveAction.action.ReadValue<Vector2>() : Vector2.zero;
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         MoveInput = moveInput;
-        IsRunning = runAction.action.IsPressed() && moveInput.sqrMagnitude > 0.01f;
+        bool runPressed = HasAction(runAction) && runAction.action.IsPressed();
+        IsRunning = runPressed && moveInput.sqrMagnitude > 0.01f;
 
         // 3. Futás
-        float currentSpeed = runAction.action.IsPressed() ? runSpeed : walkSpeed;
+        float currentSpeed = runPressed ? runSpeed : walkSpeed;
 
         // 4. Ugrás
-        if (jumpAction.action.WasPressedThisFrame() && isGrounded)
+        if (HasAction(jumpAction) && jumpAction.action.WasPressedThisFrame() && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             Jumped?.Invoke();

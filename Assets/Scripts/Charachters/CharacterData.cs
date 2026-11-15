@@ -36,6 +36,13 @@ public class CharacterData : ScriptableObject
     [Tooltip("How fast weapons are drawn (1 = normal, 2 = twice as fast). Also the draw animation speed.")]
     public float drawSpeedMultiplier = 1f;
 
+    [Header("Primary weapons")]
+    [Tooltip("One element per primary weapon the character carries (slot 2, 3 ...). Each element = the kinds allowed in that slot, " +
+             "e.g. Jason: [Sword], Hal: [Sword, Bow] (he chooses one), a later character: [Gun], [Sword]. Empty = fists only.")]
+    public WeaponCategory[] primarySlots;
+    [Tooltip("Weapon per slot when nothing was chosen (game scene started directly) and the first pick on the select screen.")]
+    public PrimaryWeaponData[] defaultWeapons;
+
     [Header("Knives")]
     [Tooltip("Knives the character starts with.")]
     public int startingKnives = 3;

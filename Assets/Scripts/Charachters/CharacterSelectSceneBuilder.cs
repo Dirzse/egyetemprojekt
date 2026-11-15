@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -479,3 +480,4 @@ public static class CharacterSelectSceneBuilder
         EditorBuildSettings.scenes = scenes.ToArray();
     }
 }
+#endif

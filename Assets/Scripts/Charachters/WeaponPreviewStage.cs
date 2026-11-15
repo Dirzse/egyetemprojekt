@@ -82,6 +82,14 @@ public class WeaponPreviewStage : MonoBehaviour
         }
     }
 
+    // Turns the whole preview off, e.g. the second weapon frame for a character with one primary weapon
+    public void SetVisible(bool visible)
+    {
+        if (weaponCamera) weaponCamera.enabled = visible;
+        if (modelRoot) modelRoot.gameObject.SetActive(visible);
+        if (!visible && noModelLabel) noModelLabel.SetActive(false);
+    }
+
     public void Show(GameObject prefab)
     {
         if (current) current.SetActive(false);

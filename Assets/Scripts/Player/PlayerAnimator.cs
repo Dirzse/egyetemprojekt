@@ -17,6 +17,13 @@ public class PlayerAnimator : MonoBehaviour
     [Tooltip("Blend tree value used while running (walk = 1, run = this value).")]
     [SerializeField] float runBlendValue = 2f;
 
+    [Tooltip("Name of the weapon / punch layer in the controller.")]
+    [SerializeField] string upperBodyLayer = "Upper Body";
+
+    [Tooltip("How fast the upper body layer fades in and out (weight per second). " +
+             "It is only on while that layer plays a clip, so unarmed (or a state without a clip) the arms follow the locomotion.")]
+    [SerializeField] float upperBodyBlendSpeed = 8f;
+
     static readonly int MoveXHash = Animator.StringToHash("MoveX");
     static readonly int MoveYHash = Animator.StringToHash("MoveY");
     static readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
@@ -25,6 +32,9 @@ public class PlayerAnimator : MonoBehaviour
 
     PlayerMovement movement;
     bool warnedMissing;
+    Animator layerAnimator;
+    Animator configuredAnimator;
+    int upperLayerIndex = -1;
 
     void Awake()
     {
@@ -46,8 +56,13 @@ public class PlayerAnimator : MonoBehaviour
                 return false;
             }
             warnedMissing = false;
+        }
 
-            animator.applyRootMotion = false;
+        // Also when the model swap redirected the field to the new model's Animator (it copies the old settings)
+        if (animator != configuredAnimator)
+        {
+            configuredAnimator = animator;
+            animator.applyRootMotion = false;   // root motion would move the model away from the CharacterController (floating, sinking)
             animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             if (animator.avatar == null)
                 Debug.LogWarning("PlayerAnimator: '" + animator.name + "' has no Avatar. Set its FBX Rig to Humanoid.");
@@ -76,6 +91,27 @@ public class PlayerAnimator : MonoBehaviour
         animator.SetFloat(MoveYHash, input.y * scale, dampTime, Time.deltaTime);
         animator.SetBool(IsGroundedHash, movement.IsGrounded);
         animator.SetFloat(VerticalVelocityHash, movement.VerticalVelocity);
+
+        UpdateUpperBodyWeight();
+    }
+
+    void UpdateUpperBodyWeight()
+    {
+        if (layerAnimator != animator)
+        {
+            layerAnimator = animator;
+            upperLayerIndex = animator.GetLayerIndex(upperBodyLayer);
+        }
+        if (upperLayerIndex <= 0) return;
+
+        // During a transition the state it goes to decides (e.g. Empty -> Punch fades in right away)
+        int clips = animator.IsInTransition(upperLayerIndex)
+            ? animator.GetNextAnimatorClipInfoCount(upperLayerIndex)
+            : animator.GetCurrentAnimatorClipInfoCount(upperLayerIndex);
+
+        float target = clips > 0 ? 1f : 0f;
+        float weight = Mathf.MoveTowards(animator.GetLayerWeight(upperLayerIndex), target, upperBodyBlendSpeed * Time.deltaTime);
+        animator.SetLayerWeight(upperLayerIndex, weight);
     }
 
     void OnJumped()

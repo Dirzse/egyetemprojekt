@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 099096904dd3bbb4fa5cb1d1a615a03e, type: 3}
+  m_Name: PrimaryWeapon_Sword
+  m_EditorClassIdentifier: Assembly-CSharp::PrimaryWeaponData
+  displayName: Sword
+  description: 
+  category: 2
+  weaponPrefab: {fileID: 9051449089600791548, guid: 0b19d65b854dc2f44889e35adc9f77ee, type: 3}
+  previewModel: {fileID: 9051449089600791548, guid: 0b19d65b854dc2f44889e35adc9f77ee, type: 3}

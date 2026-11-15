@@ -45,7 +45,7 @@ public class ThrownKnife : MonoBehaviour
         if (stuck) return;
         stuck = true;
 
-        collision.collider.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
+        DamageUtil.Apply(collision.collider, damage);
 
         // Stick into the target; the collider stays on so it can be picked up with F
         rb.isKinematic = true;

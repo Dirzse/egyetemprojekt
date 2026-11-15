@@ -1726,21 +1726,16 @@ MonoBehaviour:
   reloadBar: {fileID: 101918}
   drawSpeedBar: {fileID: 102051}
   knivesBar: {fileID: 102184}
-  weaponOptions:
-  - displayName: Sword
-    weaponSlot: 0
-    previewModel: {fileID: 4334314812708720168, guid: edccbf15fadd9704cb7a2020a492b120, type: 3}
-  - displayName: Bow
-    weaponSlot: 1
-    previewModel: {fileID: 100054, guid: 0be2ba322dd85494db39a44ee439af41, type: 3}
-  - displayName: Axe
-    weaponSlot: 2
-    previewModel: {fileID: 1948186286613674, guid: f063809a91c6b0248956e054e09b9b56, type: 3}
-  - displayName: Knife
-    weaponSlot: 3
-    previewModel: {fileID: 0}
+  primaryWeapons:
+  - {fileID: 11400000, guid: abee9275d33d2c242be1421dda19ee85, type: 2}
+  - {fileID: 11400000, guid: e3e60c8ba6ff7884d98b5cba8ddaa587, type: 2}
   weaponStage: {fileID: 101113}
   weaponNameText: {fileID: 101106}
+  weaponPanel: {fileID: 0}
+  fistsOnlyText: Fists
+  secondWeaponStage: {fileID: 0}
+  secondWeaponNameText: {fileID: 0}
+  secondWeaponPanel: {fileID: 0}
   maxHealthValue: 200
   maxDamageMultiplier: 2
   maxRunSpeed: 15

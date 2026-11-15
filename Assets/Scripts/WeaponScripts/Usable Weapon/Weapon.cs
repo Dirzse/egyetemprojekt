@@ -19,9 +19,19 @@ public abstract class Weapon : MonoBehaviour
              "Shown while this weapon is NOT in the hand, so the character visibly carries it.")]
     [SerializeField] GameObject holsteredVisual;
 
+    [Header("World pickup")]
+    [Tooltip("The weapon lies in the world and can be picked up with F (it goes to the last slot and is in hand right away). " +
+             "It can not be kept: switching to another weapon drops it. Give it a Rigidbody and a Collider.")]
+    [SerializeField] bool worldPickup = false;
+    [Tooltip("Position / rotation in the hand (relative to the WeaponHolder's pickup socket).")]
+    [SerializeField] Vector3 holdPosition;
+    [SerializeField] Vector3 holdRotation;
+
     protected float nextUseTime;
     float drawReadyTime;
     AmmoInventory inventory;
+    WeaponHolder holder;
+    bool isHeld;
 
     public string DisplayName => string.IsNullOrEmpty(displayName) ? name : displayName;
 
@@ -87,8 +97,57 @@ public abstract class Weapon : MonoBehaviour
     protected float DrawSpeedMultiplier => OwnerStats != null ? OwnerStats.DrawSpeedMultiplier : 1f;
     protected float ThrowPowerMultiplier => OwnerStats != null ? OwnerStats.ThrowPowerMultiplier : 1f;
 
+    // Value of the Animator's WeaponType parameter while this weapon is in the hand: 0 none, 1 bow, 2 sword, 3 knife, 4 gun
+    public virtual int AnimationType => 0;
+
+    // The Animator of the player's current model, found through the WeaponHolder (null if there is none)
+    protected Animator CharacterAnimator
+    {
+        get
+        {
+            if (holder == null)
+            {
+                PlayerMovement player = GetComponentInParent<PlayerMovement>(true);
+                if (player != null) holder = player.GetComponentInChildren<WeaponHolder>(true);
+            }
+            return holder != null ? holder.CharacterAnimator : null;
+        }
+    }
+
     // World pickup: only weapons that override these can be picked up and dropped (e.g. Gun)
-    public virtual bool CanBePickedUp => false;
-    public virtual void OnPickedUp(Transform socket) { }
-    public virtual void OnDropped(Vector3 position, Vector3 velocity) { }
+    // (or any weapon with "World Pickup" ticked: it uses the default code below)
+    public virtual bool CanBePickedUp => worldPickup && !isHeld;
+
+    public virtual void OnPickedUp(Transform socket)
+    {
+        if (!worldPickup) return;
+        isHeld = true;
+
+        Rigidbody body = GetComponent<Rigidbody>();
+        if (body) body.isKinematic = true;
+        foreach (Collider c in GetComponentsInChildren<Collider>(true)) c.enabled = false;
+
+        transform.SetParent(socket, false);
+        transform.localPosition = holdPosition;
+        transform.localRotation = Quaternion.Euler(holdRotation);
+    }
+
+    public virtual void OnDropped(Vector3 position, Vector3 velocity)
+    {
+        if (!worldPickup) return;
+        isHeld = false;
+
+        gameObject.SetActive(true);   // it is hidden while another weapon is in hand
+        transform.SetParent(null, true);
+        transform.position = position;
+        foreach (Collider c in GetComponentsInChildren<Collider>(true)) c.enabled = true;
+
+        Rigidbody body = GetComponent<Rigidbody>();
+        if (body)
+        {
+            body.isKinematic = false;
+            body.linearVelocity = velocity;   // before Unity 6: body.velocity
+            body.angularVelocity = Random.insideUnitSphere * 3f;
+        }
+    }
 }

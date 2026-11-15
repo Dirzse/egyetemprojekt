@@ -11,6 +11,8 @@ public class EnemyAI : MonoBehaviour
     [Header("Életerő")]
     public float maxHealth = 100f;
     public float currentHealth;
+    [Tooltip("Writes every hit (damage and remaining health) to the Console.")]
+    public bool logDamage = true;
 
     [Header("Látás")]
     public float viewDistance = 15f;
@@ -86,6 +88,7 @@ public class EnemyAI : MonoBehaviour
         if (isDead) return;
 
         currentHealth -= amount;
+        if (logDamage) Debug.Log(name + " took " + amount.ToString("0.#") + " damage, health: " + Mathf.Max(0f, currentHealth).ToString("0.#") + " / " + maxHealth, this);
 
         // Ha megsebzik, azonnal tudja, hol van a játékos
         if (player != null)

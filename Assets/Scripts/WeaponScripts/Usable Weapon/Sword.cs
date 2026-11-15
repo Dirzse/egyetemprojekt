@@ -6,6 +6,10 @@ public class Sword : Weapon
     [SerializeField] Camera playerCamera;
     [SerializeField] Animator animator;          // opcionális: "Swing" trigger, ha van saját animációd
 
+    // Falls back to the player's model Animator (also after the character swap)
+    Animator Anim => animator && animator.isActiveAndEnabled ? animator : CharacterAnimator;
+    public override int AnimationType => 2;
+
     [Header("Ütés")]
     [SerializeField] float range = 2.2f;
     [SerializeField] float radius = 0.5f;
@@ -51,6 +55,14 @@ public class Sword : Weapon
         base.OnUnequip();
     }
 
+    // A sword picked up from the world: its rest pose is the pose in the hand
+    public override void OnPickedUp(Transform socket)
+    {
+        base.OnPickedUp(socket);
+        restPos = swingTarget.localPosition;
+        restRot = swingTarget.localRotation;
+    }
+
     void ApplyRest()
     {
         if (!restCaptured) return;
@@ -63,7 +75,7 @@ public class Sword : Weapon
         if (!Input.GetMouseButtonDown(0) || !CanUse) return;
 
         nextUseTime = Time.time + Mathf.Max(cooldown, windupTime + slashTime + recoverTime);
-        if (animator) animator.SetTrigger("Swing");
+        if (Anim) Anim.SetTrigger("Swing");
         StartCoroutine(Swing());
     }
 
@@ -95,7 +107,9 @@ public class Sword : Weapon
 
     void DoHit()
     {
-        Transform cam = playerCamera.transform;
+        Camera view = playerCamera != null ? playerCamera : Camera.main;   // a spawned prefab has no camera reference
+        if (view == null) return;
+        Transform cam = view.transform;
         // Skips the player's own body and weapons (the sword model has colliders too)
         if (DamageUtil.SphereCastIgnoring(cam.position, radius, cam.forward, range, hitMask, transform.root, out RaycastHit hit))
         {

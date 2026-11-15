@@ -21,6 +21,9 @@ public class Bow : Weapon
     [Tooltip("The character's Animator (Survival_Character). Optional: if empty, no animation is played.")]
     [SerializeField] Animator animator;
 
+    // Falls back to the player's model Animator (also after the character swap)
+    Animator Anim => animator && animator.isActiveAndEnabled ? animator : CharacterAnimator;
+
     static readonly int BowDrawHash = Animator.StringToHash("BowDraw");
     static readonly int BowFireHash = Animator.StringToHash("BowFire");
 
@@ -28,22 +31,24 @@ public class Bow : Weapon
 
     public override bool TryGetAmmoType(out AmmoType type) { type = AmmoType.Arrow; return true; }
 
+    public override int AnimationType => 1;
+
     public override void HandleInput()
     {
         // Csak akkor kezd tölteni, ha van nyíl
         if (Input.GetMouseButtonDown(0) && CanUse && HasAmmo(AmmoType.Arrow))
         {
             chargeStart = Time.time;
-            if (animator) animator.SetBool(BowDrawHash, true);
+            if (Anim) Anim.SetBool(BowDrawHash, true);
         }
 
         if (Input.GetMouseButtonUp(0) && chargeStart >= 0f)
         {
             float charge = Mathf.Clamp01((Time.time - chargeStart) / maxChargeTime);
-            if (animator)
+            if (Anim)
             {
-                animator.SetBool(BowDrawHash, false);
-                animator.SetTrigger(BowFireHash);
+                Anim.SetBool(BowDrawHash, false);
+                Anim.SetTrigger(BowFireHash);
             }
             if (ConsumeAmmo(AmmoType.Arrow) > 0) Fire(charge);
             chargeStart = -1f;
@@ -55,8 +60,9 @@ public class Bow : Weapon
     {
         Vector3 dir = muzzle.forward;   // alapból mindig a cső irányába
 
-        if (aimAtCrosshair && playerCamera != null &&
-            Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward,
+        Camera view = playerCamera != null ? playerCamera : Camera.main;   // a spawned prefab has no camera reference
+        if (aimAtCrosshair && view != null &&
+            Physics.Raycast(view.transform.position, view.transform.forward,
                             out RaycastHit hit, 200f, aimMask, QueryTriggerInteraction.Ignore))
         {
             dir = (hit.point - muzzle.position).normalized;
@@ -70,11 +76,11 @@ public class Bow : Weapon
     public override void OnUnequip()
     {
         chargeStart = -1f;
-        if (animator)
+        if (Anim)
         {
             // Cancel a draw in progress when switching weapons
-            animator.SetBool(BowDrawHash, false);
-            animator.ResetTrigger(BowFireHash);
+            Anim.SetBool(BowDrawHash, false);
+            Anim.ResetTrigger(BowFireHash);
         }
         base.OnUnequip();
     }

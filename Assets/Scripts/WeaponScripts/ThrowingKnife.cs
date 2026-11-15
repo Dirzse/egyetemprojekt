@@ -11,6 +11,9 @@ public class ThrowingKnife : Weapon
     [SerializeField] ThrownKnife knifePrefab;      // Rigidbody + Collider + ThrownKnife script
     [SerializeField] GameObject knifeInHand;       // the knife model in the hand, hidden when out of knives
     [SerializeField] Animator animator;            // optional: KnifeSlash, SlashSide, KnifeAim, Throw
+
+    // Falls back to the player's model Animator (also after the character swap)
+    Animator Anim => animator && animator.isActiveAndEnabled ? animator : CharacterAnimator;
     [Tooltip("Optional: knives on the body (thigh strap). The one in the hand is not counted in it.")]
     [SerializeField] KnifeHolster holster;
 
@@ -47,7 +50,14 @@ public class ThrowingKnife : Weapon
     int slashSide;          // 0 = right to left, 1 = left to right
     float defaultFov;
 
-    public int KnifeCount => knifeCount;
+    public int KnifeCount => Knives;
+
+    // With an AmmoInventory on the player the knives come from it (HUD, ammo boxes), otherwise from knifeCount
+    int Knives => Inventory != null ? Inventory.Get(AmmoType.Knife) : knifeCount;
+
+    public override bool TryGetAmmoType(out AmmoType type) { type = AmmoType.Knife; return true; }
+
+    public override int AnimationType => 3;
 
     void Awake()
     {
@@ -57,8 +67,9 @@ public class ThrowingKnife : Weapon
     public override void HandleInput()
     {
         UpdateZoom();
+        UpdateHandVisual();   // ammo boxes can add knives at any time
 
-        if (knifeCount <= 0)
+        if (Knives <= 0)
         {
             StopAiming();
             return;
@@ -81,10 +92,10 @@ public class ThrowingKnife : Weapon
     void Slash()
     {
         nextUseTime = Time.time + cooldown;
-        if (animator)
+        if (Anim)
         {
-            animator.SetInteger(SlashSideHash, slashSide);
-            animator.SetTrigger(KnifeSlashHash);
+            Anim.SetInteger(SlashSideHash, slashSide);
+            Anim.SetTrigger(KnifeSlashHash);
         }
         slashSide = 1 - slashSide;   // next swing goes the other way
         Invoke(nameof(DoSlashHit), slashHitDelay);
@@ -94,10 +105,9 @@ public class ThrowingKnife : Weapon
     {
         Transform cam = playerCamera.transform;
         // Same as the sword: SphereCast forward from the camera
-        if (Physics.SphereCast(cam.position, slashRadius, cam.forward, out RaycastHit hit,
-                               slashRange, hitMask, QueryTriggerInteraction.Ignore))
+        if (DamageUtil.SphereCastIgnoring(cam.position, slashRadius, cam.forward, slashRange, hitMask, transform.root, out RaycastHit hit))
         {
-            hit.collider.SendMessage("TakeDamage", slashDamage * DamageMultiplier, SendMessageOptions.DontRequireReceiver);
+            DamageUtil.Apply(hit.collider, slashDamage * DamageMultiplier);
         }
     }
 
@@ -106,28 +116,29 @@ public class ThrowingKnife : Weapon
     void StartAiming()
     {
         isAiming = true;
-        if (animator) animator.SetBool(KnifeAimHash, true);
+        if (Anim) Anim.SetBool(KnifeAimHash, true);
     }
 
     void StopAiming()
     {
         if (!isAiming) return;
         isAiming = false;
-        if (animator) animator.SetBool(KnifeAimHash, false);
+        if (Anim) Anim.SetBool(KnifeAimHash, false);
     }
 
     void Throw()
     {
         StopAiming();
         nextUseTime = Time.time + Mathf.Max(throwCooldown, releaseDelay);
-        if (animator) animator.SetTrigger(ThrowHash);
+        if (Anim) Anim.SetTrigger(ThrowHash);
         Invoke(nameof(Release), releaseDelay);
     }
 
     void Release()
     {
-        if (knifeCount <= 0) return;
-        knifeCount--;
+        if (Knives <= 0) return;
+        if (Inventory != null) ConsumeAmmo(AmmoType.Knife);
+        else knifeCount--;
 
         // Aim at what is under the crosshair, but start from the hand
         Transform cam = playerCamera.transform;
@@ -156,10 +167,18 @@ public class ThrowingKnife : Weapon
     // Returns false if the player already carries the maximum
     public bool AddKnives(int amount)
     {
-        if (knifeCount >= maxKnives) return false;
-        knifeCount = Mathf.Min(knifeCount + amount, maxKnives);
+        bool added;
+        if (Inventory != null)
+        {
+            added = Inventory.Add(AmmoType.Knife, amount) > 0;
+        }
+        else
+        {
+            added = knifeCount < maxKnives;
+            knifeCount = Mathf.Min(knifeCount + amount, maxKnives);
+        }
         UpdateHandVisual();
-        return true;
+        return added;
     }
 
     // Called by PlayerStats with the selected character's values
@@ -167,15 +186,22 @@ public class ThrowingKnife : Weapon
     {
         maxKnives = Mathf.Max(0, max);
         knifeCount = Mathf.Clamp(count, 0, maxKnives);
+
+        // Starting knives of the character go into the AmmoInventory (its own max stays)
+        if (Inventory != null)
+        {
+            Inventory.Consume(AmmoType.Knife, Inventory.Get(AmmoType.Knife));
+            Inventory.Add(AmmoType.Knife, knifeCount);
+        }
         UpdateHandVisual();
     }
 
     void UpdateHandVisual()
     {
-        bool inHand = gameObject.activeSelf && knifeCount > 0;   // active = equipped
+        bool inHand = gameObject.activeSelf && Knives > 0;   // active = equipped
         if (knifeInHand) knifeInHand.SetActive(inHand);
         // The strap shows the rest: every knife, minus the one in the hand
-        if (holster) holster.Show(inHand ? knifeCount - 1 : knifeCount);
+        if (holster) holster.Show(inHand ? Knives - 1 : Knives);
     }
 
     // ---------- Equip ----------
@@ -192,10 +218,10 @@ public class ThrowingKnife : Weapon
         CancelInvoke();
         StopAiming();
         if (playerCamera && throwZoomFov > 0f) playerCamera.fieldOfView = defaultFov;
-        if (animator)
+        if (Anim)
         {
-            animator.ResetTrigger(KnifeSlashHash);
-            animator.ResetTrigger(ThrowHash);
+            Anim.ResetTrigger(KnifeSlashHash);
+            Anim.ResetTrigger(ThrowHash);
         }
         base.OnUnequip();
         UpdateHandVisual();   // the knife from the hand goes back to the strap
