@@ -21,6 +21,11 @@ public class WeaponHolder : MonoBehaviour
     [Tooltip("Fist attacks while no weapon is in the hand. Added automatically if empty.")]
     [SerializeField] UnarmedCombat unarmed;
 
+    [Header("Knives")]
+    [Tooltip("The last knife can not be thrown, it stays in the hand for slashing. " +
+             "Loaded from the settings window (Controls > Keep Last Knife) at start and when the settings are applied.")]
+    [SerializeField] bool keepLastKnife = false;
+
     [Header("Mouse wheel")]
     [SerializeField] bool scrollSwitch = true;
     [Tooltip("Off: wheel down = next slot.")]
@@ -42,11 +47,22 @@ public class WeaponHolder : MonoBehaviour
     int primaryCount;
     Animator appliedAnimator;
     int PickedIndex => slots.Count;   // its number key comes after the fixed weapons
-    int SlotCount => slots.Count + (pickedWeapon != null ? 1 : 0);
+    public int SlotCount => slots.Count + (pickedWeapon != null ? 1 : 0);
 
     public Weapon Current => GetWeapon(current);
     public bool HasPickedWeapon => pickedWeapon != null;
     public bool IsUnarmed => Current == null;
+
+    public bool KeepLastKnife
+    {
+        get => keepLastKnife;
+        set => keepLastKnife = value;
+    }
+
+    // For the HUD: slot 0 = fists (null), the last one is the picked up weapon if there is one
+    public int CurrentSlot => current;
+    public Weapon GetSlot(int index) => GetWeapon(index);
+    public bool IsPickedSlot(int index) => pickedWeapon != null && index == PickedIndex;
 
     // The Animator of the player's current model. The model swap replaces the Animator, so it is looked up again when needed.
     public Animator CharacterAnimator
@@ -71,6 +87,8 @@ public class WeaponHolder : MonoBehaviour
 
     void Start()
     {
+        keepLastKnife = GameSettings.KeepLastKnife;
+
         if (unarmed == null) unarmed = GetComponent<UnarmedCombat>();
         if (unarmed == null) unarmed = gameObject.AddComponent<UnarmedCombat>();
 
@@ -91,7 +109,11 @@ public class WeaponHolder : MonoBehaviour
             else Debug.LogWarning("WeaponHolder: weapon slot " + (i + 1) + " is empty (None) in the Weapons list.", this);
         }
 
-        for (int i = 1; i < slots.Count; i++) slots[i].OnUnequip();
+        for (int i = 1; i < slots.Count; i++)
+        {
+            DisableSolidColliders(slots[i]);
+            slots[i].OnUnequip();
+        }
 
         // Fists by default, the first primary weapon if the character has one
         current = 0;
@@ -107,6 +129,14 @@ public class WeaponHolder : MonoBehaviour
         PlayerStats stats = GetComponentInParent<PlayerStats>();
         if (stats != null && stats.Data != null && stats.Data.defaultWeapons != null) return stats.Data.defaultWeapons;
         return new PrimaryWeaponData[0];
+    }
+
+    // A solid collider moving with the player is something the CharacterController can step onto:
+    // walking forward lifts the player into the air. Weapons in the hand do not need one (hits use casts).
+    static void DisableSolidColliders(Weapon weapon)
+    {
+        foreach (Collider c in weapon.GetComponentsInChildren<Collider>(true))
+            if (!c.isTrigger) c.enabled = false;
     }
 
     Weapon SpawnPrimary(PrimaryWeaponData data)

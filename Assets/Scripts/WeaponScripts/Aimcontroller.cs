@@ -27,6 +27,7 @@ public class AimController : MonoBehaviour
         Weapon w = holder.Current;
         bool aiming = w != null && w.IsAiming;
 
+        normalFov = GameSettings.FieldOfView;   // set in the settings window
         float target = aiming ? w.AimFov : normalFov;
         cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, target, 1f - Mathf.Exp(-zoomSpeed * Time.deltaTime));
 

@@ -46,8 +46,10 @@ public class MouseLook : MonoBehaviour
     void Update()
     {
         // Egér bemenetek lekérése, szorozva az érzékenységgel és az idővel (függetlenítve a framerate-től)
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        // The settings window's sensitivity multiplies it, and it can invert the Y axis
+        float sensitivity = mouseSensitivity * GameSettings.MouseSensitivity;
+        float mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime * (GameSettings.InvertMouseY ? -1f : 1f);
 
         // Az Y egérmozgás (fel-le) kivonása a belső forgási értékből (ha hozzáadnánk, fordítva működne a kamera)
         xRotation -= mouseY;

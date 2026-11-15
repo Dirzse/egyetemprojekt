@@ -51,6 +51,7 @@ public class ThrowingKnife : Weapon
     float defaultFov;
 
     public int KnifeCount => Knives;
+    public bool IsAimingThrow => isAiming;   // for the crosshair
 
     // With an AmmoInventory on the player the knives come from it (HUD, ammo boxes), otherwise from knifeCount
     int Knives => Inventory != null ? Inventory.Get(AmmoType.Knife) : knifeCount;
@@ -58,6 +59,18 @@ public class ThrowingKnife : Weapon
     public override bool TryGetAmmoType(out AmmoType type) { type = AmmoType.Knife; return true; }
 
     public override int AnimationType => 3;
+
+    // "Keep last knife" (settings / WeaponHolder): the last knife stays in the hand, it can still slash
+    bool CanThrow => Knives > 1 || !KeepsLastKnife;
+
+    bool KeepsLastKnife
+    {
+        get
+        {
+            WeaponHolder holder = GetComponentInParent<WeaponHolder>();
+            return holder != null && holder.KeepLastKnife;
+        }
+    }
 
     void Awake()
     {
@@ -76,7 +89,7 @@ public class ThrowingKnife : Weapon
         }
 
         // Aiming: holding RMB starts it (also if it was held during the draw)
-        if (!isAiming && Input.GetMouseButton(1) && CanUse) StartAiming();
+        if (!isAiming && Input.GetMouseButton(1) && CanUse && CanThrow) StartAiming();
 
         if (isAiming)
         {
@@ -136,7 +149,13 @@ public class ThrowingKnife : Weapon
 
     void Release()
     {
-        if (Knives <= 0) return;
+        if (Knives <= 0 || !CanThrow) return;
+        if (knifePrefab == null || throwPoint == null || playerCamera == null)
+        {
+            // Nothing would fly, so do not use up a knife either
+            Debug.LogError("ThrowingKnife: set Knife Prefab, Throw Point and Player Camera in the Inspector.", this);
+            return;
+        }
         if (Inventory != null) ConsumeAmmo(AmmoType.Knife);
         else knifeCount--;
 

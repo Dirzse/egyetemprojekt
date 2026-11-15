@@ -33,6 +33,10 @@ public class Bow : Weapon
 
     public override int AnimationType => 1;
 
+    // For the crosshair: is the string being pulled, and how far (0-1)
+    public bool IsDrawing => chargeStart >= 0f;
+    public float Charge => IsDrawing ? Mathf.Clamp01((Time.time - chargeStart) / maxChargeTime) : 0f;
+
     public override void HandleInput()
     {
         // Csak akkor kezd tölteni, ha van nyíl

@@ -82,12 +82,16 @@ public class EnemyAI : MonoBehaviour
         roamRadius = radius;
     }
 
+    // Every hit on an enemy (the crosshair shows a hit marker); true = it died from this hit
+    public static event System.Action<EnemyAI, bool> Damaged;
+
     // Ezt hívd meg a sebzést okozó scriptből (lövedék, kard, stb.)
     public void TakeDamage(float amount)
     {
         if (isDead) return;
 
         currentHealth -= amount;
+        Damaged?.Invoke(this, currentHealth <= 0f);
         if (logDamage) Debug.Log(name + " took " + amount.ToString("0.#") + " damage, health: " + Mathf.Max(0f, currentHealth).ToString("0.#") + " / " + maxHealth, this);
 
         // Ha megsebzik, azonnal tudja, hol van a játékos

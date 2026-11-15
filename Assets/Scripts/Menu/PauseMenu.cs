@@ -15,10 +15,34 @@ public class PauseMenu : MonoBehaviour
         Resume();
     }
 
+    void OnEnable()
+    {
+        Settings.Opened += HideWhileSettingsOpen;
+        Settings.Closed += ShowAfterSettings;
+    }
+
+    void OnDisable()
+    {
+        Settings.Opened -= HideWhileSettingsOpen;
+        Settings.Closed -= ShowAfterSettings;
+    }
+
+    // The settings window opens over the pause menu: the pause menu is hidden meanwhile and comes back after it
+    void HideWhileSettingsOpen()
+    {
+        if (isPaused && pauseMenuUI != null) pauseMenuUI.SetActive(false);
+    }
+
+    void ShowAfterSettings()
+    {
+        if (isPaused && pauseMenuUI != null) pauseMenuUI.SetActive(true);
+    }
+
     void Update()
     {
         // Az Escape billentyű lenyomásának figyelése
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // (not while the settings window is open: there Esc closes the settings)
+        if (Input.GetKeyDown(KeyCode.Escape) && !Settings.BlocksEscape)
         {
             if (isPaused)
             {
