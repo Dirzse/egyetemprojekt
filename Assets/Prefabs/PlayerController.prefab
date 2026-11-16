@@ -14,9 +14,10 @@ GameObject:
   - component: {fileID: 2744465016312372728}
   - component: {fileID: 1722415411415624358}
   - component: {fileID: 8500315100138363415}
+  - component: {fileID: 4369955131149740525}
   m_Layer: 6
   m_Name: Camera
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -172,6 +173,31 @@ MonoBehaviour:
   cam: {fileID: 7994754641268891593}
   crosshair: {fileID: 0}
   zoomSpeed: 12
+--- !u!114 &4369955131149740525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 296735435710595809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19abdadb35eeb154c9fd51a546f14dc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThirdPersonCamera
+  startInThirdPerson: 0
+  switchViewAction: {fileID: 1468621425352655727, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  aimAction: {fileID: -4090225696740746782, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  distance: 3
+  shoulderOffset: 0.6
+  heightOffset: 0.15
+  aimDistance: 1.6
+  aimShoulderOffset: 0.7
+  collisionRadius: 0.25
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  smoothing: 12
 --- !u!1 &2888636729315898226
 GameObject:
   m_ObjectHideFlags: 0
@@ -335,6 +361,7 @@ MonoBehaviour:
   animator: {fileID: 0}
   holsterKey: 120
   unarmed: {fileID: 0}
+  keepLastKnife: 0
   scrollSwitch: 1
   invertScroll: 0
   pickupSocket: {fileID: 0}
@@ -528,9 +555,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterHealth
   maxHealth: 100
-  healthSlider: {fileID: 0}
-  easeHealthSlider: {fileID: 0}
-  lerpSpeed: 5
   onDeath:
     m_PersistentCalls:
       m_Calls: []

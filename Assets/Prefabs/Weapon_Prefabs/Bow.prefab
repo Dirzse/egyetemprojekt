@@ -41,6 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8912949234306267546}
   - component: {fileID: 7968314342439111897}
+  - component: {fileID: -835725476092751038}
   m_Layer: 0
   m_Name: Bow
   m_TagString: Untagged
@@ -98,6 +99,24 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   animator: {fileID: 0}
+--- !u!114 &-835725476092751038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7133181934951222438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54d196676894f8745b7a910f06367ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponGrip
+  model: {fileID: 5741680371292908965}
+  hand: 17
+  position: {x: 0, y: 0, z: 0}
+  rotation: {x: 0, y: 0, z: 0}
+  scale: {x: 0, y: 0, z: 0}
+  onlyInThirdPerson: 1
 --- !u!1001 &5746278559400693733
 PrefabInstance:
   m_ObjectHideFlags: 0

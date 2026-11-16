@@ -116,9 +116,11 @@ public class ThrowingKnife : Weapon
 
     void DoSlashHit()
     {
-        Transform cam = playerCamera.transform;
         // Same as the sword: SphereCast forward from the camera
-        if (DamageUtil.SphereCastIgnoring(cam.position, slashRadius, cam.forward, slashRange, hitMask, transform.root, out RaycastHit hit))
+        // (from the eyes forward, so it also reaches in third person)
+        Vector3 origin = AimUtil.Origin(playerCamera);
+        Vector3 direction = AimUtil.MeleeDirection(playerCamera);
+        if (DamageUtil.SphereCastIgnoring(origin, slashRadius, direction, slashRange, hitMask, transform.root, out RaycastHit hit))
         {
             DamageUtil.Apply(hit.collider, slashDamage * DamageMultiplier);
         }
@@ -160,12 +162,8 @@ public class ThrowingKnife : Weapon
         else knifeCount--;
 
         // Aim at what is under the crosshair, but start from the hand
-        Transform cam = playerCamera.transform;
-        Vector3 target = cam.position + cam.forward * 100f;
-        if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, 100f, aimMask, QueryTriggerInteraction.Ignore))
-        {
-            target = hit.point;
-        }
+        // (the player's own colliders are skipped: in third person the ray starts behind them)
+        Vector3 target = AimUtil.AimPoint(playerCamera, transform.root, aimMask, 100f);
         Vector3 dir = (target - throwPoint.position).normalized;
 
         ThrownKnife knife = Instantiate(knifePrefab, throwPoint.position, Quaternion.LookRotation(dir));

@@ -23,7 +23,10 @@ public class PlayerInteract : MonoBehaviour
 
         Camera cam = playerCamera != null ? playerCamera : Camera.main;
         if (cam == null) return;
-        if (!Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit,
+        // From the eyes towards the crosshair, so the reach is the same in third person
+        Vector3 origin = AimUtil.Origin(cam);
+        Vector3 direction = AimUtil.Direction(cam, origin, transform.root, pickupMask);
+        if (!Physics.Raycast(origin, direction, out RaycastHit hit,
                              pickupRange, pickupMask, QueryTriggerInteraction.Ignore)) return;
 
         // Weapon lying in the world

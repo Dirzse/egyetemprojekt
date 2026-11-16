@@ -64,12 +64,12 @@ public class Bow : Weapon
     {
         Vector3 dir = muzzle.forward;   // alapból mindig a cső irányába
 
-        Camera view = playerCamera != null ? playerCamera : Camera.main;   // a spawned prefab has no camera reference
-        if (aimAtCrosshair && view != null &&
-            Physics.Raycast(view.transform.position, view.transform.forward,
-                            out RaycastHit hit, 200f, aimMask, QueryTriggerInteraction.Ignore))
+        Camera view = playerCamera != null ? playerCamera : PlayerCamera;   // a spawned prefab has no camera reference
+        // In third person always towards the crosshair: the bow is not where the camera looks from
+        if (view != null && (aimAtCrosshair || AimUtil.IsThirdPerson(view)))
         {
-            dir = (hit.point - muzzle.position).normalized;
+            Vector3 target = AimUtil.AimPoint(view, transform.root, aimMask, 200f);
+            dir = (target - muzzle.position).normalized;
         }
 
         Arrow arrow = Instantiate(arrowPrefab, muzzle.position, Quaternion.LookRotation(dir));

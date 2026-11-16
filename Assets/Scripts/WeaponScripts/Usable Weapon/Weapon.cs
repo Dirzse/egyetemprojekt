@@ -32,6 +32,7 @@ public abstract class Weapon : MonoBehaviour
     AmmoInventory inventory;
     WeaponHolder holder;
     bool isHeld;
+    Camera playerView;
 
     public string DisplayName => string.IsNullOrEmpty(displayName) ? name : displayName;
 
@@ -96,6 +97,21 @@ public abstract class Weapon : MonoBehaviour
     protected float DamageMultiplier => OwnerStats != null ? OwnerStats.DamageMultiplier : 1f;
     protected float DrawSpeedMultiplier => OwnerStats != null ? OwnerStats.DrawSpeedMultiplier : 1f;
     protected float ThrowPowerMultiplier => OwnerStats != null ? OwnerStats.ThrowPowerMultiplier : 1f;
+
+    // The player's own camera (a spawned weapon prefab has no camera reference, and the camera may not be tagged MainCamera)
+    protected Camera PlayerCamera
+    {
+        get
+        {
+            if (playerView == null)
+            {
+                PlayerMovement player = GetComponentInParent<PlayerMovement>(true);
+                if (player != null) playerView = player.GetComponentInChildren<Camera>(true);
+                if (playerView == null) playerView = Camera.main;
+            }
+            return playerView;
+        }
+    }
 
     // Value of the Animator's WeaponType parameter while this weapon is in the hand: 0 none, 1 bow, 2 sword, 3 knife, 4 gun
     public virtual int AnimationType => 0;

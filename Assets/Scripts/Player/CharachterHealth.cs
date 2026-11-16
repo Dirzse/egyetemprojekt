@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
@@ -12,13 +11,6 @@ public class CharacterHealth : MonoBehaviour
 
     // A zóna ezen keresztül olvassa ki az aktuális életerőt (csak olvasni lehet, átírni nem)
     public float CurrentHealth => currentHealth;
-
-    [Header("UI beállítások")]
-    public Slider healthSlider; // A piros, azonnal csökkenő csúszka
-    public Slider easeHealthSlider; // A sárga, lassan követő csúszka
-
-    [Header("Sebesség beállítások")]
-    public float lerpSpeed = 5f; // Milyen gyorsan kövesse le a sárga csúszka a sebzést
 
     [Header("Események")]
     public UnityEvent onDeath; // Ebbe az eseménybe köthető be a specifikus halál logika
@@ -41,13 +33,6 @@ public class CharacterHealth : MonoBehaviour
         // Kezdeti életerő beállítása a maximumra induláskor
         currentHealth = maxHealth;
 
-        // Beállítjuk a sárga csúszka maximumát induláskor
-        if (easeHealthSlider != null)
-        {
-            easeHealthSlider.maxValue = maxHealth;
-            easeHealthSlider.value = maxHealth;
-        }
-
         // Megkeressük a karakter saját colliderét az érintés-ellenőrzéshez
         // Először ezen az objektumon, aztán a gyerekein keressük
         ownCollider = GetComponent<Collider>();
@@ -56,25 +41,10 @@ public class CharacterHealth : MonoBehaviour
         {
             Debug.LogWarning("CharacterHealth: nincs Collider a karakteren, a HealthAndDamageZone-ok nem fognak működni.");
         }
-
-        UpdateHealthUI();
     }
 
     private void Update()
     {
-        // Finom lekövetés (Easing) a sárga sávnál a lerp függvénnyel
-        if (easeHealthSlider != null && easeHealthSlider.value != currentHealth)
-        {
-            // A lerp matematikai átmenetet képez a jelenlegi sárga érték és az új, csökkentett health érték között
-            easeHealthSlider.value = Mathf.Lerp(easeHealthSlider.value, currentHealth, lerpSpeed * Time.deltaTime);
-
-            // Ha már elég közel van, ráillesztjük, így a következő frame-ektől nem számol tovább
-            if (Mathf.Abs(easeHealthSlider.value - currentHealth) < 0.01f)
-            {
-                easeHealthSlider.value = currentHealth;
-            }
-        }
-
         // Automatikus gyógyulás (a billentyűzet-ellenőrzés elé kell, mert az ott lévő return kihagyná)
         HandleRegen();
 
@@ -155,8 +125,6 @@ public class CharacterHealth : MonoBehaviour
         {
             regenTimeLeft = Mathf.Max(regenTimeLeft, otherHealPenalty);
         }
-
-        UpdateHealthUI();
     }
 
     // 2. Metódus: Sebzés elszenvedése és életerő csökkentése
@@ -169,34 +137,19 @@ public class CharacterHealth : MonoBehaviour
 
         if (currentHealth > 0)
         {
-            // Ha a karakternek van még életereje, szinkronizáljuk a UI-t
-            UpdateHealthUI();
-
             // Sebzés után elölről indul a gyógyulás visszaszámlálása (gyógyulás közben is megszakítja)
             regenPending = true;
             regenTimeLeft = regenDelay;
         }
         else
         {
-            // Ha az életerő 0 vagy kevesebb, pontosan 0-ra állítjuk, frissítjük a UI-t, majd meghívjuk a halált
+            // Ha az életerő 0 vagy kevesebb, pontosan 0-ra állítjuk, majd meghívjuk a halált
             currentHealth = 0;
-            UpdateHealthUI();
             Die();
         }
     }
 
-    // 3. Metódus: Életerő UI (Slider) frissítése
-    public void UpdateHealthUI()
-    {
-        // Csak akkor frissítünk, ha a csúszka (Slider) be van állítva az Inspectorban
-        if (healthSlider != null)
-        {
-            healthSlider.maxValue = maxHealth;
-            healthSlider.value = currentHealth; // Azonnali frissítés a piros sávnál
-        }
-    }
-
-    // 4. Metódus: Halál kezelése és a pálya (map) resetelése
+    // 3. Metódus: Halál kezelése és a pálya (map) resetelése
     public void Die()
     {
         // Meghívjuk az eseményt is, hátha rá van kötve más logika (pl. hang lejátszása)

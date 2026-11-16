@@ -83,7 +83,10 @@ public class UnarmedCombat : MonoBehaviour
         PlayerMovement player = GetComponentInParent<PlayerMovement>();
         Transform owner = player != null ? player.transform : transform.root;   // skips the player's own colliders
 
-        if (DamageUtil.SphereCastIgnoring(cam.transform.position, radius, cam.transform.forward, range, hitMask, owner, out RaycastHit hit))
+        // From the eyes forward (in third person the camera is behind the player)
+        Vector3 origin = AimUtil.Origin(cam);
+        Vector3 direction = AimUtil.MeleeDirection(cam);
+        if (DamageUtil.SphereCastIgnoring(origin, radius, direction, range, hitMask, owner, out RaycastHit hit))
         {
             DamageUtil.Apply(hit.collider, damage * multiplier);
 

@@ -107,11 +107,13 @@ public class Sword : Weapon
 
     void DoHit()
     {
-        Camera view = playerCamera != null ? playerCamera : Camera.main;   // a spawned prefab has no camera reference
+        Camera view = playerCamera != null ? playerCamera : PlayerCamera;   // a spawned prefab has no camera reference
         if (view == null) return;
-        Transform cam = view.transform;
+        // From the eyes forward (in third person the camera is behind the player)
+        Vector3 origin = AimUtil.Origin(view);
+        Vector3 direction = AimUtil.MeleeDirection(view);
         // Skips the player's own body and weapons (the sword model has colliders too)
-        if (DamageUtil.SphereCastIgnoring(cam.position, radius, cam.forward, range, hitMask, transform.root, out RaycastHit hit))
+        if (DamageUtil.SphereCastIgnoring(origin, radius, direction, range, hitMask, transform.root, out RaycastHit hit))
         {
             DamageUtil.Apply(hit.collider, damage * DamageMultiplier);
 

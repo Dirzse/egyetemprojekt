@@ -54,6 +54,7 @@ public class Settings : MonoBehaviour
     float volume;
 
     bool isOpen;
+    bool quitting;
     int currentTab;
     int closedFrame = -1;
     CursorLockMode previousLockState;
@@ -80,6 +81,8 @@ public class Settings : MonoBehaviour
             return;
         }
         Instance = this;
+        // A copy put into a scene (e.g. under another canvas) is moved to the root: only root objects survive scene loads
+        if (transform.parent != null) transform.SetParent(null, false);
         DontDestroyOnLoad(gameObject);
 
         if (tabs.Count == 0) tabs.AddRange(GetComponentsInChildren<SettingsTab>(true));
@@ -107,6 +110,7 @@ public class Settings : MonoBehaviour
     void OnDestroy()
     {
         if (Instance != this) return;
+        if (!quitting) Debug.LogWarning("Settings: the settings window was destroyed while the game runs. Something deletes it.", this);
         SceneManager.sceneLoaded -= OnSceneLoaded;
         Instance = null;
     }
@@ -116,6 +120,8 @@ public class Settings : MonoBehaviour
         if (isOpen) Close();
         HookButtons();
     }
+
+    void OnApplicationQuit() { quitting = true; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -145,6 +151,13 @@ public class Settings : MonoBehaviour
 
     public void Open()
     {
+        // Called on the prefab asset or a copy (e.g. from a button's On Click list): open the real window instead
+        if (this != Instance)
+        {
+            if (Instance == null) CreateInstance();
+            if (Instance != null && Instance != this) Instance.Open();
+            return;
+        }
         if (isOpen || window == null) return;
         LoadSaved();
 
@@ -162,6 +175,11 @@ public class Settings : MonoBehaviour
 
     public void Close()
     {
+        if (this != Instance)
+        {
+            if (Instance != null) Instance.Close();
+            return;
+        }
         if (!isOpen) return;
         isOpen = false;
         closedFrame = Time.frameCount;
