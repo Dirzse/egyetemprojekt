@@ -6,15 +6,14 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-// Settings window with tabs (Display, Graphics, Controls, Audio). The window is a normal UI prefab:
-// Assets/Resources/UI/Settings.prefab, made by Tools > UI > Build Settings Window, then edit it like any prefab.
-// At startup (FrameRateLimiter) it is spawned once and kept between scenes. Every button whose name contains
+// Settings window with tabs (Display, Graphics, Controls, Audio). The window is a normal UI prefab, in any folder
+// (e.g. Assets/Prefabs/UI/Settings.prefab), made by Tools > UI > Build Settings Window, then edit it like any prefab.
+// Drag it into the first scenes (MainMenu, and Guns1.2 for starting it directly): it is kept between scenes,
+// and a second copy in a later scene removes itself. Every button whose name contains
 // "Settings" (e.g. the main menu's and the pause menu's) opens it, or call Open() from a button.
 // Esc or Back closes it without changes, Apply saves and applies them, Defaults puts everything back on Normal.
 public class Settings : MonoBehaviour
 {
-    const string PrefabPath = "UI/Settings";
-
     public static Settings Instance { get; private set; }
     public static bool IsOpen => Instance != null && Instance.isOpen;
 
@@ -60,15 +59,10 @@ public class Settings : MonoBehaviour
     CursorLockMode previousLockState;
     bool previousCursorVisible;
 
-    public static void CreateInstance()
+    // Without a prefab it does nothing: the window placed in the scene registers itself in Awake
+    public static void CreateInstance(GameObject prefab = null)
     {
-        if (Instance != null) return;
-        GameObject prefab = Resources.Load<GameObject>(PrefabPath);
-        if (prefab == null)
-        {
-            Debug.LogWarning("Settings: no prefab at Resources/" + PrefabPath + ". Make it with Tools > UI > Build Settings Window.");
-            return;
-        }
+        if (Instance != null || prefab == null) return;
         GameObject instance = Instantiate(prefab);
         instance.name = prefab.name;
     }
@@ -154,7 +148,7 @@ public class Settings : MonoBehaviour
         // Called on the prefab asset or a copy (e.g. from a button's On Click list): open the real window instead
         if (this != Instance)
         {
-            if (Instance == null) CreateInstance();
+            if (Instance == null) CreateInstance(gameObject.scene.IsValid() ? null : gameObject);   // a button pointing at the prefab asset
             if (Instance != null && Instance != this) Instance.Open();
             return;
         }

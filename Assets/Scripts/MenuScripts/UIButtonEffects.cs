@@ -109,7 +109,7 @@ public class UIButtonEffects : MonoBehaviour, IPointerEnterHandler, IPointerExit
             // "settings" opens the settings window over the menu instead of loading a scene;
             // the button can be used again after it
             if (Settings.Instance != null) Settings.Instance.Open();
-            else Debug.LogWarning("UIButtonEffects: no settings window. Make it with Tools > UI > Build Settings Window.", this);
+            else Debug.LogWarning("UIButtonEffects: no settings window in this scene. Drag the Settings prefab into the scene.", this);
             isClicked = false;
             if (buttonText != null) buttonText.color = originalColor;
         }
