@@ -4,6 +4,11 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyAI : MonoBehaviour
 {
+    public enum EnemyType { Melee, Ranged, Creeper }
+
+    [Header("Ellenség Típusa")]
+    public EnemyType enemyType = EnemyType.Melee;
+
     [Header("Hivatkozások")]
     public Transform player;
     public LayerMask obstacleMask;      // Falak, akadályok rétege (a játékos NE legyen benne)
@@ -14,33 +19,57 @@ public class EnemyAI : MonoBehaviour
     [Tooltip("Writes every hit (damage and remaining health) to the Console.")]
     public bool logDamage = true;
 
+    [Header("Támadás - Általános")]
+    public float attackDamage = 15f;
+    public float attackCooldown = 1.5f;
+    public float turnToPlayerSpeed = 8f;
+
+    [Header("1. Kardos (Melee) beállítások")]
+    public float meleeRange = 2.2f;
+
+    [Header("2. Íjász (Ranged) beállítások")]
+    public GameObject projectilePrefab;   // A kilőtt nyílvessző prefabja
+    public Transform firePoint;           // Honnan induljon a lövedék (pl. íj/kéz pozíciója)
+    public float preferredRange = 12f;    // Ennél közelebb nem jön, ha rálát a játékosra
+    public float retreatRange = 5f;       // Ha ennél közelebb jössz hozzá, hátrál
+    public float projectileSpeed = 25f;
+
+    [Header("3. Creeper (Robbanó) beállítások")]
+    public float fuseStartDistance = 3f;  // Milyen közel kell érnie, hogy elkezdjen sziszegni
+    public float fuseCancelDistance = 5.5f; // Ha ennyire elfutsz, leáll a visszaszámlálás
+    public float fuseDuration = 3.5f;     // Hány mp után robban
+    public float explosionRadius = 5f;    // Robbanás hatósugara
+    public float explosionDamage = 60f;
+    public GameObject explosionEffect;    // Opcionális részecskeeffekt robbanáskor
+
     [Header("Látás")]
     public float viewDistance = 15f;
     [Range(1f, 360f)] public float viewAngle = 110f;
-    public float eyeHeight = 1.6f;      // Honnan "néz" az ellenség
-    public float playerTargetHeight = 1f; // A játékos mely pontját célozza a Raycast
+    public float eyeHeight = 1.6f;
+    public float playerTargetHeight = 1f;
 
     [Header("Mozgás")]
     public float chaseSpeed = 5f;
     public float returnSpeed = 2.5f;
 
     [Header("Memória")]
-    public float memoryDuration = 60f;  // Ennyi ideig emlékszik (másodperc)
+    public float memoryDuration = 60f;
 
     [Header("Keresés")]
-    public float searchRotateSpeed = 120f; // Az első teljes körbefordulás sebessége (fok/mp)
-    public float lookTurnSpeed = 90f;      // Random nézelődésnél a fordulás sebessége (fok/mp)
-    public float lookPauseMin = 0.5f;      // Min. ennyit néz egy irányba (mp)
-    public float lookPauseMax = 2.5f;      // Max. ennyit néz egy irányba (mp)
+    public float searchRotateSpeed = 120f;
+    public float lookTurnSpeed = 90f;
+    public float lookPauseMin = 0.5f;
+    public float lookPauseMax = 2.5f;
 
-    [Header("Roaming (when it does not know about the player)")]
+    [Header("Roaming")]
     public bool roam = true;
-    public float roamRadius = 10f;         // around the start point (or the spawner's sphere)
+    public float roamRadius = 10f;
     public float roamSpeed = 2f;
-    public float roamWaitMin = 1f;         // pause between two roam points (seconds)
+    public float roamWaitMin = 1f;
     public float roamWaitMax = 4f;
 
     private NavMeshAgent agent;
+    private CharacterHealth playerHealth;
     private Vector3 startPosition;
     private Vector3 lastKnownPosition;
     private float timeSinceLastSeen = Mathf.Infinity;
@@ -54,6 +83,11 @@ public class EnemyAI : MonoBehaviour
     private bool roamMoving = false;
     private float roamWaitTimer = 0f;
 
+    // Támadás és Creeper változók
+    private float attackTimer = 0f;
+    private float currentFuseTimer = 0f;
+    private bool isFusing = false;
+
     private enum State { Idle, Roam, Chase, GoToLastKnown, Searching, Return }
     private State state = State.Roam;
 
@@ -66,26 +100,30 @@ public class EnemyAI : MonoBehaviour
         SetPlayer();
     }
 
-    public void SetPlayer(){
+    public void SetPlayer()
+    {
         if (player == null)
         {
             PlayerMovement playerMovement = FindFirstObjectByType<PlayerMovement>();
             if (playerMovement != null) player = playerMovement.transform;
             else Debug.LogWarning("EnemyAI: no PlayerMovement found in the scene.", this);
         }
+
+        if (player != null)
+        {
+            playerHealth = player.GetComponentInParent<CharacterHealth>();
+            if (playerHealth == null) playerHealth = player.GetComponentInChildren<CharacterHealth>();
+        }
     }
 
-    // Called by EnemySpawner: the enemy roams inside the spawner's sphere
     public void SetRoamArea(Vector3 center, float radius)
     {
         roamCenter = center;
         roamRadius = radius;
     }
 
-    // Every hit on an enemy (the crosshair shows a hit marker); true = it died from this hit
     public static event System.Action<EnemyAI, bool> Damaged;
 
-    // Ezt hívd meg a sebzést okozó scriptből (lövedék, kard, stb.)
     public void TakeDamage(float amount)
     {
         if (isDead) return;
@@ -94,7 +132,6 @@ public class EnemyAI : MonoBehaviour
         Damaged?.Invoke(this, currentHealth <= 0f);
         if (logDamage) Debug.Log(name + " took " + amount.ToString("0.#") + " damage, health: " + Mathf.Max(0f, currentHealth).ToString("0.#") + " / " + maxHealth, this);
 
-        // Ha megsebzik, azonnal tudja, hol van a játékos
         if (player != null)
         {
             lastKnownPosition = player.position;
@@ -109,17 +146,19 @@ public class EnemyAI : MonoBehaviour
             Die();
         }
     }
-    
+
     void Die()
     {
         isDead = true;
-        agent.enabled = false;
-        Destroy(gameObject); // Eltűnik a pályáról
+        if (agent != null && agent.isOnNavMesh) agent.enabled = false;
+        Destroy(gameObject);
     }
 
     void Update()
     {
         if (isDead) return;
+
+        if (attackTimer > 0f) attackTimer -= Time.deltaTime;
 
         bool canSee = CanSeePlayer();
 
@@ -134,38 +173,219 @@ public class EnemyAI : MonoBehaviour
         {
             timeSinceLastSeen += Time.deltaTime;
 
-            // Lejárt az 1 perc -> elfelejti a játékost
             if (timeSinceLastSeen >= memoryDuration)
             {
                 hasMemory = false;
+                ResetCreeperFuse();
                 state = State.Return;
             }
             else if (state == State.Chase)
             {
+                ResetCreeperFuse();
                 state = State.GoToLastKnown;
             }
         }
 
         switch (state)
         {
-            case State.Idle:          break;
-            case State.Roam:          DoRoam();          break;
-            case State.Chase:         DoChase();         break;
+            case State.Idle: break;
+            case State.Roam: DoRoam(); break;
+            case State.Chase: DoChase(canSee); break;
             case State.GoToLastKnown: DoGoToLastKnown(); break;
-            case State.Searching:     DoSearching();     break;
-            case State.Return:        DoReturn();        break;
+            case State.Searching: DoSearching(); break;
+            case State.Return: DoReturn(); break;
         }
     }
 
-    void DoChase()
+    void DoChase(bool canSee)
     {
         roamMoving = false;
-        agent.speed = chaseSpeed;
-        agent.SetDestination(player.position);
+        if (player == null) return;
+
+        float distToPlayer = Vector3.Distance(transform.position, player.position);
+
+        switch (enemyType)
+        {
+            case EnemyType.Melee:
+                HandleMeleeChase(distToPlayer);
+                break;
+
+            case EnemyType.Ranged:
+                HandleRangedChase(distToPlayer, canSee);
+                break;
+
+            case EnemyType.Creeper:
+                HandleCreeperChase(distToPlayer);
+                break;
+        }
+    }
+
+    // --- 1. KARDOS (MELEE) ---
+    void HandleMeleeChase(float dist)
+    {
+        if (dist > meleeRange)
+        {
+            agent.isStopped = false;
+            agent.speed = chaseSpeed;
+            agent.SetDestination(player.position);
+        }
+        else
+        {
+            agent.isStopped = true;
+            FacePlayer();
+
+            if (attackTimer <= 0f)
+            {
+                attackTimer = attackCooldown;
+                if (playerHealth != null)
+                {
+                    playerHealth.TakeDamage(attackDamage);
+                }
+                // Ide jöhet majd az ütés animáció: animator.SetTrigger("Attack");
+            }
+        }
+    }
+
+    // --- 2. ÍJÁSZ (RANGED) ---
+    void HandleRangedChase(float dist, bool canSee)
+    {
+        // Ha túl messze van, vagy nem lát rá tisztán, közelebb megy
+        if (dist > preferredRange || !canSee)
+        {
+            agent.isStopped = false;
+            agent.speed = chaseSpeed;
+            agent.SetDestination(player.position);
+        }
+        // Ha a játékos túl közel jött hozzá, hátrál egy kicsit
+        else if (dist < retreatRange)
+        {
+            Vector3 dirAway = (transform.position - player.position).normalized;
+            Vector3 retreatTarget = transform.position + dirAway * 4f;
+            if (NavMesh.SamplePosition(retreatTarget, out NavMeshHit hit, 3f, NavMesh.AllAreas))
+            {
+                agent.isStopped = false;
+                agent.speed = chaseSpeed * 0.8f;
+                agent.SetDestination(hit.position);
+            }
+            FacePlayer();
+        }
+        // Optimális lőtávon belül van és rálát: megáll és lő
+        else
+        {
+            agent.isStopped = true;
+            FacePlayer();
+
+            if (attackTimer <= 0f)
+            {
+                attackTimer = attackCooldown;
+                ShootProjectile();
+            }
+        }
+    }
+
+    void ShootProjectile()
+    {
+        if (projectilePrefab == null)
+        {
+            Debug.LogWarning("EnemyAI (Ranged): nincs beállítva projectilePrefab!", this);
+            return;
+        }
+
+        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + Vector3.up * eyeHeight + transform.forward * 0.6f;
+        Vector3 targetPos = player.position + Vector3.up * playerTargetHeight;
+        Vector3 shootDir = (targetPos - spawnPos).normalized;
+
+        GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.LookRotation(shootDir));
+
+        // Ha van rajta Rigidbody, meglökjük
+        if (proj.TryGetComponent<Rigidbody>(out Rigidbody rb))
+        {
+            rb.linearVelocity = shootDir * projectileSpeed;
+        }
+        // Ha a csapat lövedék scriptje saját maga mozog előre, a LookRotation már a játékos felé fordította!
+    }
+
+    // --- 3. CREEPER (ROBBANÓ) ---
+    void HandleCreeperChase(float dist)
+    {
+        if (!isFusing)
+        {
+            agent.isStopped = false;
+            agent.speed = chaseSpeed;
+            agent.SetDestination(player.position);
+
+            if (dist <= fuseStartDistance)
+            {
+                isFusing = true;
+                currentFuseTimer = 0f;
+                agent.isStopped = true;
+            }
+        }
+        else
+        {
+            FacePlayer();
+
+            // Ha a játékos elfutott, megszakad a robbanás és újra üldözi
+            if (dist > fuseCancelDistance)
+            {
+                ResetCreeperFuse();
+                return;
+            }
+
+            currentFuseTimer += Time.deltaTime;
+            // Itt lehet pl. villogtatni vagy nagyítani a modellt a visszaszámlálás alatt!
+
+            if (currentFuseTimer >= fuseDuration)
+            {
+                Explode();
+            }
+        }
+    }
+
+    void ResetCreeperFuse()
+    {
+        isFusing = false;
+        currentFuseTimer = 0f;
+        if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
+    }
+
+    void Explode()
+    {
+        if (explosionEffect != null)
+        {
+            Instantiate(explosionEffect, transform.position, Quaternion.identity);
+        }
+
+        Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius);
+        foreach (Collider col in hits)
+        {
+            CharacterHealth health = col.GetComponentInParent<CharacterHealth>();
+            if (health != null && health == playerHealth)
+            {
+                // Távolságtól függő vagy fix sebzés
+                health.TakeDamage(explosionDamage);
+                break;
+            }
+        }
+
+        Die();
+    }
+
+    void FacePlayer()
+    {
+        if (player == null) return;
+        Vector3 dir = player.position - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude > 0.001f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, turnToPlayerSpeed * Time.deltaTime);
+        }
     }
 
     void DoGoToLastKnown()
     {
+        agent.isStopped = false;
         agent.speed = chaseSpeed;
         agent.SetDestination(lastKnownPosition);
 
@@ -179,10 +399,8 @@ public class EnemyAI : MonoBehaviour
 
     void DoSearching()
     {
-        // Megáll az utolsó látott helyen és "körülnéz"
         agent.ResetPath();
 
-        // 1) Egy teljes körbefordulás
         if (!fullRotationDone)
         {
             float step = searchRotateSpeed * Time.deltaTime;
@@ -197,7 +415,6 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        // 2) Random irányokba nézelődik (a memória lejártáig, ami után hazamegy)
         transform.rotation = Quaternion.RotateTowards(
             transform.rotation, lookTargetRotation, lookTurnSpeed * Time.deltaTime);
 
@@ -218,6 +435,7 @@ public class EnemyAI : MonoBehaviour
 
     void DoReturn()
     {
+        agent.isStopped = false;
         agent.speed = returnSpeed;
         agent.SetDestination(startPosition);
 
@@ -229,10 +447,10 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    // Walks to random points on the NavMesh inside the roam area, with short pauses
     void DoRoam()
     {
         if (!roam || !agent.isOnNavMesh) return;
+        agent.isStopped = false;
         agent.speed = roamSpeed;
 
         if (roamMoving)
@@ -291,14 +509,11 @@ public class EnemyAI : MonoBehaviour
 
         if (dist > viewDistance) return false;
 
-        // Látószög ellenőrzés
         float angle = Vector3.Angle(transform.forward, new Vector3(dir.x, 0f, dir.z));
         if (angle > viewAngle * 0.5f) return false;
 
-        // Takarásban van-e (fal, akadály)
         if (Physics.Raycast(eyePos, dir.normalized, out RaycastHit hit, dist, obstacleMask))
         {
-            // Ha a találat maga a játékos (vagy az ellenség), az nem akadály
             bool hitPlayer = hit.transform == player || hit.transform.IsChildOf(player);
             bool hitSelf = hit.transform.IsChildOf(transform);
             if (!hitPlayer && !hitSelf)
@@ -308,7 +523,6 @@ public class EnemyAI : MonoBehaviour
         return true;
     }
 
-    // Szerkesztőben látható segédvonalak
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
@@ -319,10 +533,25 @@ public class EnemyAI : MonoBehaviour
         Gizmos.DrawRay(transform.position, left * viewDistance);
         Gizmos.DrawRay(transform.position, right * viewDistance);
 
-        if (Application.isPlaying && hasMemory)
+        // Hatótávok vizualizálása típus szerint
+        if (enemyType == EnemyType.Melee)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(lastKnownPosition, 0.5f);
+            Gizmos.DrawWireSphere(transform.position, meleeRange);
+        }
+        else if (enemyType == EnemyType.Ranged)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, preferredRange);
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(transform.position, retreatRange);
+        }
+        else if (enemyType == EnemyType.Creeper)
+        {
+            Gizmos.color = new Color(1f, 0.5f, 0f);
+            Gizmos.DrawWireSphere(transform.position, fuseStartDistance);
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, explosionRadius);
         }
 
         if (roam)
