@@ -8,7 +8,7 @@ using UnityEngine.AI;
 public class EnemySpawner : MonoBehaviour
 {
     [Header("Enemies")]
-    [SerializeField] EnemyAI enemyPrefab;
+    [SerializeField] EnemyAI[] enemyPrefabs;
     [SerializeField] int maxAlive = 5;
     [Tooltip("Enemies already placed in the scene inside the sphere are counted too.")]
     [SerializeField] bool countExistingEnemies = true;
@@ -62,9 +62,9 @@ public class EnemySpawner : MonoBehaviour
         if (movement != null) player = movement.transform;
         playerCamera = Camera.main;
 
-        if (enemyPrefab == null)
+        if (enemyPrefabs == null || enemyPrefabs.Length == 0)
         {
-            Debug.LogWarning("EnemySpawner: no Enemy Prefab assigned.", this);
+            Debug.LogWarning("EnemySpawner: no Enemy Prefabs assigned.", this);
             enabled = false;
             return;
         }
@@ -122,7 +122,10 @@ public class EnemySpawner : MonoBehaviour
     void Spawn(Vector3 point)
     {
         Quaternion rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-        EnemyAI enemy = Instantiate(enemyPrefab, point, rotation);
+        EnemyAI chosenPrefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
+        if (chosenPrefab == null) return;
+
+        EnemyAI enemy = Instantiate(chosenPrefab, point, rotation);
 
         if (roamInsideArea)
         {
